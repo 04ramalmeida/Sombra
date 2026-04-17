@@ -27,6 +27,10 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.MapGet("/posts", async (SombraDb db) =>
+    await db.Posts.ToListAsync()
+);
+
 app.MapGet("/posts/{id}", async (int id, SombraDb db) =>
 {
     var post = await db.Posts.FindAsync(id);
