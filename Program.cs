@@ -49,4 +49,14 @@ app.MapPut("/posts/{id}", async (int id, Post input, SombraDb db) =>
     return Results.Ok(post);
 });
 
+app.MapDelete("/posts/{id}", async (int id, SombraDb db) =>
+{
+    var post = await db.Posts.FindAsync(id);
+    if (post is null) return Results.NotFound();
+
+    db.Posts.Remove(post);
+    await db.SaveChangesAsync();
+    return Results.NoContent();
+});
+
 app.Run();
