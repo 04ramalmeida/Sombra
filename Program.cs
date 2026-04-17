@@ -27,9 +27,22 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.MapGet("/posts", async (SombraDb db) =>
-    await db.Posts.ToListAsync()
-);
+app.MapGet("/posts", async (string? searchTerm, SombraDb db) =>
+{
+    if (string.IsNullOrEmpty(searchTerm))
+    {
+        var posts = await db.Posts.ToListAsync();
+        return Results.Ok(posts);
+    }
+
+
+    var results = await db.Posts.Where(p => p.Title.Contains(searchTerm) ||
+                        p.Content.Contains(searchTerm) ||
+                        p.Category.Contains(searchTerm)
+                        ).ToListAsync();
+
+    return Results.Ok(results);
+});
 
 app.MapGet("/posts/{id}", async (int id, SombraDb db) =>
 {
