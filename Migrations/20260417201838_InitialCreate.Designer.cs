@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Sombra.Migrations
 {
     [DbContext(typeof(SombraDb))]
-    [Migration("20260417195502_InitialCreate")]
+    [Migration("20260417201838_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
