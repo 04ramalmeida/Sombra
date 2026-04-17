@@ -35,4 +35,18 @@ app.MapPost("/posts", async (Post post, SombraDb db) =>
     return Results.Created($"/posts/{post.Id}", post);
 });
 
+app.MapPut("/posts/{id}", async (int id, Post input, SombraDb db) =>
+{
+    var post = await db.Posts.FindAsync(id);
+    if (post is null) return Results.NotFound();
+
+    post.Title = input.Title;
+    post.Content = input.Content;
+    post.Category = input.Category;
+    post.Tags = input.Tags;
+
+    await db.SaveChangesAsync();
+    return Results.Ok(post);
+});
+
 app.Run();
