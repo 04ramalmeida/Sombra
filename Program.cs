@@ -27,6 +27,12 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.MapGet("/", () => "Hello World!");
+app.MapPost("/posts", async (Post post, SombraDb db) =>
+{
+    db.Posts.Add(post);
+    await db.SaveChangesAsync();
+
+    return Results.Created($"/posts/{post.Id}", post);
+});
 
 app.Run();
