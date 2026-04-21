@@ -29,44 +29,49 @@ if (app.Environment.IsDevelopment())
 
 var posts = app.MapGroup("/posts");
 
-posts.MapGet("/", async (string? searchTerm, SombraDb db) =>
+posts.MapGet("/", GetPosts);
+posts.MapGet("/{id}", GetPost);
+posts.MapPost("/", CreatePost);
+posts.MapPut("/{id}", UpdatePost);
+posts.MapDelete("/{id}", DeletePost);
+
+
+static async Task<IResult> GetPosts(string? searchTerm, SombraDb db)
 {
     if (string.IsNullOrEmpty(searchTerm))
     {
         var posts = await db.Posts.ToListAsync();
-        return Results.Ok(posts);
+        return TypedResults.Ok(posts);
     }
-
 
     var results = await db.Posts.Where(p => p.Title.Contains(searchTerm) ||
                         p.Content.Contains(searchTerm) ||
                         p.Category.Contains(searchTerm)
                         ).ToListAsync();
 
-    return Results.Ok(results);
-});
+    return TypedResults.Ok(results);
+}
 
-posts.MapGet("/{id}", async (int id, SombraDb db) =>
+static async Task<IResult> GetPost(int id, SombraDb db)
 {
     var post = await db.Posts.FindAsync(id);
-    if (post is null) return Results.NotFound();
+    if (post is null) return TypedResults.NotFound();
 
-    return Results.Ok(post);
+    return TypedResults.Ok(post);
+}
 
-});
-
-posts.MapPost("/", async (Post post, SombraDb db) =>
+static async Task<IResult> CreatePost(Post post, SombraDb db)
 {
     db.Posts.Add(post);
     await db.SaveChangesAsync();
 
-    return Results.Created($"/posts/{post.Id}", post);
-});
+    return TypedResults.Created($"/posts/{post.Id}", post);
+}
 
-posts.MapPut("/{id}", async (int id, Post input, SombraDb db) =>
+static async Task<IResult> UpdatePost(int id, Post input, SombraDb db)
 {
     var post = await db.Posts.FindAsync(id);
-    if (post is null) return Results.NotFound();
+    if (post is null) return TypedResults.NotFound();
 
     post.Title = input.Title;
     post.Content = input.Content;
@@ -74,17 +79,18 @@ posts.MapPut("/{id}", async (int id, Post input, SombraDb db) =>
     post.Tags = input.Tags;
 
     await db.SaveChangesAsync();
-    return Results.Ok(post);
-});
+    return TypedResults.Ok(post);
+}
 
-posts.MapDelete("/{id}", async (int id, SombraDb db) =>
+static async Task<IResult> DeletePost(int id, SombraDb db)
 {
     var post = await db.Posts.FindAsync(id);
-    if (post is null) return Results.NotFound();
+    if (post is null) return TypedResults.NotFound();
 
     db.Posts.Remove(post);
     await db.SaveChangesAsync();
-    return Results.NoContent();
-});
+    return TypedResults.NoContent();
+}
+
 
 app.Run();
