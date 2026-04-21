@@ -27,7 +27,9 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.MapGet("/posts", async (string? searchTerm, SombraDb db) =>
+var posts = app.MapGroup("/posts");
+
+posts.MapGet("/", async (string? searchTerm, SombraDb db) =>
 {
     if (string.IsNullOrEmpty(searchTerm))
     {
@@ -44,7 +46,7 @@ app.MapGet("/posts", async (string? searchTerm, SombraDb db) =>
     return Results.Ok(results);
 });
 
-app.MapGet("/posts/{id}", async (int id, SombraDb db) =>
+posts.MapGet("/{id}", async (int id, SombraDb db) =>
 {
     var post = await db.Posts.FindAsync(id);
     if (post is null) return Results.NotFound();
@@ -53,7 +55,7 @@ app.MapGet("/posts/{id}", async (int id, SombraDb db) =>
 
 });
 
-app.MapPost("/posts", async (Post post, SombraDb db) =>
+posts.MapPost("/", async (Post post, SombraDb db) =>
 {
     db.Posts.Add(post);
     await db.SaveChangesAsync();
@@ -61,7 +63,7 @@ app.MapPost("/posts", async (Post post, SombraDb db) =>
     return Results.Created($"/posts/{post.Id}", post);
 });
 
-app.MapPut("/posts/{id}", async (int id, Post input, SombraDb db) =>
+posts.MapPut("/{id}", async (int id, Post input, SombraDb db) =>
 {
     var post = await db.Posts.FindAsync(id);
     if (post is null) return Results.NotFound();
@@ -75,7 +77,7 @@ app.MapPut("/posts/{id}", async (int id, Post input, SombraDb db) =>
     return Results.Ok(post);
 });
 
-app.MapDelete("/posts/{id}", async (int id, SombraDb db) =>
+posts.MapDelete("/{id}", async (int id, SombraDb db) =>
 {
     var post = await db.Posts.FindAsync(id);
     if (post is null) return Results.NotFound();
