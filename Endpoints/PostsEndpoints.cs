@@ -2,6 +2,14 @@
 using Microsoft.EntityFrameworkCore;
 public static class PostsEndpoints
 {
+
+    public record PostDto(
+        string Title,
+        string Content,
+        string Category,
+        List<string> Tags
+    );
+
     public static void RegisterPostsEndpoints(this WebApplication app)
     {
         var posts = app.MapGroup("/posts");
@@ -38,15 +46,23 @@ public static class PostsEndpoints
         return TypedResults.Ok(post);
     }
 
-    static async Task<IResult> CreatePost(Post post, SombraDb db)
+    static async Task<IResult> CreatePost(PostDto input, SombraDb db)
     {
+        var post = new Post
+        {
+            Title = input.Title,
+            Content = input.Content,
+            Category = input.Category,
+            Tags = input.Tags.ToList()
+        };
+
         db.Posts.Add(post);
         await db.SaveChangesAsync();
 
         return TypedResults.Created($"/posts/{post.Id}", post);
     }
 
-    static async Task<IResult> UpdatePost(int id, Post input, SombraDb db)
+    static async Task<IResult> UpdatePost(int id, PostDto input, SombraDb db)
     {
         var post = await db.Posts.FindAsync(id);
         if (post is null) return TypedResults.NotFound();
@@ -54,7 +70,7 @@ public static class PostsEndpoints
         post.Title = input.Title;
         post.Content = input.Content;
         post.Category = input.Category;
-        post.Tags = input.Tags;
+        post.Tags = input.Tags.ToList();
 
         await db.SaveChangesAsync();
         return TypedResults.Ok(post);
