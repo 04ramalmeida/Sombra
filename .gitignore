@@ -211,3 +211,5 @@ FakesAssemblies/
 
 # App settings
 appsettings*.json
+
+.idea/
