@@ -1,5 +1,8 @@
 
+using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore;
+
+[assembly: InternalsVisibleTo("Sombra.Tests")]
 public static class PostsEndpoints
 {
 
@@ -22,7 +25,7 @@ public static class PostsEndpoints
 
     }
 
-    static async Task<IResult> GetPosts(string? searchTerm, SombraDb db)
+    internal static async Task<IResult> GetPosts(string? searchTerm, SombraDb db)
     {
         if (string.IsNullOrEmpty(searchTerm))
         {
@@ -38,7 +41,7 @@ public static class PostsEndpoints
         return TypedResults.Ok(results);
     }
 
-    static async Task<IResult> GetPost(int id, SombraDb db)
+    internal static async Task<IResult> GetPost(int id, SombraDb db)
     {
         var post = await db.Posts.FindAsync(id);
         if (post is null) return TypedResults.NotFound();
@@ -46,7 +49,7 @@ public static class PostsEndpoints
         return TypedResults.Ok(post);
     }
 
-    static async Task<IResult> CreatePost(PostDto input, SombraDb db)
+    internal static async Task<IResult> CreatePost(PostDto input, SombraDb db)
     {
         var post = new Post
         {
@@ -62,7 +65,7 @@ public static class PostsEndpoints
         return TypedResults.Created($"/posts/{post.Id}", post);
     }
 
-    static async Task<IResult> UpdatePost(int id, PostDto input, SombraDb db)
+    internal static async Task<IResult> UpdatePost(int id, PostDto input, SombraDb db)
     {
         var post = await db.Posts.FindAsync(id);
         if (post is null) return TypedResults.NotFound();
@@ -76,7 +79,7 @@ public static class PostsEndpoints
         return TypedResults.Ok(post);
     }
 
-    static async Task<IResult> DeletePost(int id, SombraDb db)
+    internal static async Task<IResult> DeletePost(int id, SombraDb db)
     {
         var post = await db.Posts.FindAsync(id);
         if (post is null) return TypedResults.NotFound();
