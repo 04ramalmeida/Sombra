@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-class SombraDb : DbContext
+public class SombraDb : DbContext
 {
     public SombraDb(DbContextOptions<SombraDb> options)
         : base(options) { }
