@@ -64,4 +64,21 @@ public class PostTest
         Assert.Equivalent(update, updatedResult.Value);
     }
 
+    [Fact]
+    public async Task UpdatingNonExistantTaskReturnsNotFound()
+    {
+        await using var context = new MockDb().CreateDbContext();
+
+        var update = new PostsEndpoints.PostDto(
+            "My Updated Blog Post",
+            "This is the updated content of my first blog post.",
+            "Technology",
+            ["Tech", "Programming"]
+        );
+
+        var result = await PostsEndpoints.UpdatePost(1, update, context);
+
+        Assert.IsType<NotFound>(result);
+    }
+
 }
