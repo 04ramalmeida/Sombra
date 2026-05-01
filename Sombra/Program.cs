@@ -13,6 +13,8 @@ builder.Services.AddOpenApiDocument(config =>
     config.Version = "v1";
 });
 
+builder.Services.AddValidation();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

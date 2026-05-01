@@ -1,4 +1,5 @@
 
+using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,9 +8,15 @@ public static class PostsEndpoints
 {
 
     public record PostDto(
+        [property: Required]
+        [property: StringLength(64, MinimumLength = 8)]
         string Title,
+        [property: Required]
         string Content,
+        [property: Required]
+        [property: StringLength(24)]
         string Category,
+        [property: MaxLength(10)]
         List<string> Tags
     );
 
