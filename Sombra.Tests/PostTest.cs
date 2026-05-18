@@ -81,4 +81,39 @@ public class PostTest
         Assert.IsType<NotFound>(result);
     }
 
+    [Fact]
+    public async Task SuccessfulDeleteReturnsNoContent()
+    {
+        // Given
+        await using var context = new MockDb().CreateDbContext();
+
+        var post = new PostsEndpoints.PostDto(
+            "My First Blog Post",
+            "This is the content of my first blog post.",
+            "Technology",
+            ["Tech", "Programming"]);
+        
+        var postResult = await PostsEndpoints.CreatePost(post, context);
+
+
+        Assert.IsType<Created<Post>>(postResult);
+
+        var createdResult = (Created<Post>)postResult;
+        var postId = createdResult.Value.Id;
+        // When
+        var result = await PostsEndpoints.DeletePost(postId, context);
+
+        // Then
+        Assert.IsType<NoContent>(result);
+    }
+
+    [Fact]
+    public async Task NonExistentPostDeleteReturnsNotFound()
+    {
+        await using var context = new MockDb().CreateDbContext();
+        
+        var result = await PostsEndpoints.DeletePost(1, context);
+        
+        Assert.IsType<NotFound>(result);
+    }
 }
