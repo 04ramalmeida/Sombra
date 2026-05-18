@@ -5,6 +5,47 @@ namespace Sombra.Tests;
 
 public class PostTest
 {
+
+    [Fact]
+    public async Task GettingPostReturnsOkWithPost()
+    {
+        await using var context = new MockDb().CreateDbContext();
+        
+        var post = new PostsEndpoints.PostDto(
+            "My First Blog Post",
+            "This is the content of my first blog post.",
+            "Technology",
+            ["Tech", "Programming"]
+        );
+
+        var postResult = await PostsEndpoints.CreatePost(post, context);
+
+
+        Assert.IsType<Created<Post>>(postResult);
+
+        var createdResult = (Created<Post>)postResult;
+        var postId = createdResult.Value.Id;
+        
+        var result = await PostsEndpoints.GetPost(postId, context);
+        
+        Assert.IsType<Ok<Post>>(result);
+        
+        var getResult = (Ok<Post>)result;
+        
+        Assert.NotNull(getResult.Value);
+        Assert.Equivalent(post, getResult.Value);
+    }
+
+    [Fact]
+    public async Task GettingNonExistentPostReturnsNotFound()
+    {
+        await using var context = new MockDb().CreateDbContext();
+        
+        var result = await PostsEndpoints.GetPost(1, context);
+        
+        Assert.IsType<NotFound>(result);
+    }
+    
     [Fact]
     public async Task PostingPostReturnsThePost()
     {
