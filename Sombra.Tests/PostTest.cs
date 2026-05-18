@@ -6,6 +6,7 @@ namespace Sombra.Tests;
 public class PostTest
 {
 
+    // To offload post creating to its own method
     [Fact]
     public async Task GettingPostReturnsOkWithPost()
     {
@@ -45,7 +46,34 @@ public class PostTest
         
         Assert.IsType<NotFound>(result);
     }
-    
+
+    [Fact]
+    public async Task GettingPostsWithSearchTermReturnsOkWithRelevantPosts()
+    {
+        var term = "tech";
+        
+        await using var context = new MockDb().CreateDbContext();
+        
+        var post = new PostsEndpoints.PostDto(
+            "My First Blog Post",
+            "This is the content of my first blog post.",
+            "Technology",
+            ["Tech", "Programming"]
+        );
+
+        var postResult = await PostsEndpoints.CreatePost(post, context);
+
+
+        Assert.IsType<Created<Post>>(postResult);
+
+        var createdResult = (Created<Post>)postResult;
+        
+        var result = await PostsEndpoints.GetPosts(term, context);
+        
+        var okResult = Assert.IsType<Ok<List<Post>>>(result);
+        Assert.NotEmpty(okResult.Value);
+        Assert.True(PostsContainsTerm(term, okResult.Value));
+    }
     [Fact]
     public async Task PostingPostReturnsThePost()
     {
@@ -156,5 +184,29 @@ public class PostTest
         var result = await PostsEndpoints.DeletePost(1, context);
         
         Assert.IsType<NotFound>(result);
+    }
+
+    private bool PostsContainsTerm(string term, List<Post> posts)
+    {
+        bool hasTerm = false;
+
+        foreach (var post in posts)
+        {
+            hasTerm = post.Title.Contains(term, StringComparison.OrdinalIgnoreCase);
+            hasTerm = hasTerm && post.Content.Contains(term, StringComparison.OrdinalIgnoreCase);
+            hasTerm = hasTerm && post.Category.Contains(term, StringComparison.OrdinalIgnoreCase);
+            bool tagFound = false;
+            foreach (var tag in post.Tags)
+            {
+                
+                while (!tagFound)
+                {
+                    tagFound = tag.Contains(term, StringComparison.OrdinalIgnoreCase);
+                    if (tagFound) hasTerm = tagFound;
+                }
+            }
+        }
+        
+        return hasTerm;
     }
 }
