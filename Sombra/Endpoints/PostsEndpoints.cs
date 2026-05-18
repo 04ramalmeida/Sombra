@@ -40,9 +40,10 @@ public static class PostsEndpoints
             return TypedResults.Ok(posts);
         }
 
-        var results = await db.Posts.Where(p => p.Title.Contains(searchTerm) ||
-                            p.Content.Contains(searchTerm) ||
-                            p.Category.Contains(searchTerm)
+        // To find a better solution for case insensitivity
+        var results = await db.Posts.Where(p => p.Title.ToLower().Contains(searchTerm) ||
+                            p.Content.ToLower().Contains(searchTerm) ||
+                            p.Category.ToLower().Contains(searchTerm)
                             ).ToListAsync();
 
         return TypedResults.Ok(results);
