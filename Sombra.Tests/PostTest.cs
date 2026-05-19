@@ -63,10 +63,7 @@ public class PostTest
 
         var postResult = await PostsEndpoints.CreatePost(post, context);
 
-
         Assert.IsType<Created<Post>>(postResult);
-
-        var createdResult = (Created<Post>)postResult;
         
         var result = await PostsEndpoints.GetPosts(term, context);
         
@@ -74,6 +71,31 @@ public class PostTest
         Assert.NotEmpty(okResult.Value);
         Assert.True(PostsContainsTerm(term, okResult.Value));
     }
+
+    [Fact]
+    public async Task NonMatchingTermReturnsEmpty()
+    {
+        var term = "Painting";
+        
+        await using var context = new MockDb().CreateDbContext();
+        
+        var post = new PostsEndpoints.PostDto(
+            "My First Blog Post",
+            "This is the content of my first blog post.",
+            "Technology",
+            ["Tech", "Programming"]
+        );
+        
+        var postResult = await PostsEndpoints.CreatePost(post, context);
+        
+        Assert.IsType<Created<Post>>(postResult);
+        
+        var result = await PostsEndpoints.GetPosts(term, context);
+        var getResult = Assert.IsType<Ok<List<Post>>>(result);
+        
+        Assert.Empty(getResult.Value);
+    }
+    
     [Fact]
     public async Task PostingPostReturnsThePost()
     {
