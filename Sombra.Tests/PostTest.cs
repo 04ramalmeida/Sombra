@@ -218,13 +218,14 @@ public class PostTest
             hasTerm = hasTerm && post.Content.Contains(term, StringComparison.OrdinalIgnoreCase);
             hasTerm = hasTerm && post.Category.Contains(term, StringComparison.OrdinalIgnoreCase);
             bool tagFound = false;
-            foreach (var tag in post.Tags)
+            for (var index = 0; index < post.Tags.Count; )
             {
-                
-                while (!tagFound)
+                var tag = post.Tags[index];
+                while (!tagFound && index < post.Tags.Count)
                 {
                     tagFound = tag.Contains(term, StringComparison.OrdinalIgnoreCase);
                     if (tagFound) hasTerm = tagFound;
+                    index++;
                 }
             }
         }
