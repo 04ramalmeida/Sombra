@@ -204,8 +204,11 @@ public class PostTest
         await using var context = new MockDb().CreateDbContext();
         
         var result = await PostsEndpoints.DeletePost(1, context);
+        var searchResult = context.Posts.FirstOrDefault(p => p.Id == 1);
         
         Assert.IsType<NotFound>(result);
+        Assert.Null(searchResult);
+        
     }
 
     private bool PostsContainsTerm(string term, List<Post> posts)
