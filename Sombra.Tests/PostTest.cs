@@ -6,7 +6,6 @@ namespace Sombra.Tests;
 public class PostTest
 {
 
-    // To offload post creating to its own method
     [Fact]
     public async Task GettingPostReturnsOkWithPost()
     {
@@ -71,7 +70,7 @@ public class PostTest
         Assert.NotEmpty(okResult.Value);
         Assert.True(PostsContainsTerm(term, okResult.Value));
     }
-
+    
     [Fact]
     public async Task NonMatchingTermReturnsEmpty()
     {
@@ -153,6 +152,14 @@ public class PostTest
 
         Assert.NotNull(updatedResult.Value);
         Assert.Equivalent(update, updatedResult.Value);
+        
+        var dbResult = context.Posts.FirstOrDefault(p => p.Id == postId);
+        
+        Assert.NotNull(dbResult);
+        Assert.Equivalent(update.Title, dbResult.Title);
+        Assert.Equivalent(update.Content, dbResult.Content);
+        Assert.Equivalent(update.Category, dbResult.Category);
+        Assert.Equivalent(update.Tags, dbResult.Tags);
     }
 
     [Fact]
