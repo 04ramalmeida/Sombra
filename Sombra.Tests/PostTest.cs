@@ -215,8 +215,8 @@ public class PostTest
         foreach (var post in posts)
         {
             hasTerm = post.Title.Contains(term, StringComparison.OrdinalIgnoreCase);
-            hasTerm = hasTerm && post.Content.Contains(term, StringComparison.OrdinalIgnoreCase);
-            hasTerm = hasTerm && post.Category.Contains(term, StringComparison.OrdinalIgnoreCase);
+            hasTerm = hasTerm || post.Content.Contains(term, StringComparison.OrdinalIgnoreCase);
+            hasTerm = hasTerm || post.Category.Contains(term, StringComparison.OrdinalIgnoreCase);
             bool tagFound = false;
             for (var index = 0; index < post.Tags.Count; )
             {
