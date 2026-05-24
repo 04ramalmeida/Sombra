@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Xunit.Internal;
 
@@ -11,20 +12,13 @@ public class PostTest
     {
         await using var context = new MockDb().CreateDbContext();
         
-        var post = new PostsEndpoints.PostDto(
-            "My First Blog Post",
-            "This is the content of my first blog post.",
-            "Technology",
-            ["Tech", "Programming"]
-        );
-
-        var postResult = await PostsEndpoints.CreatePost(post, context);
-
-
+        var postResult = await SetupExamplePost(context);
+        
         Assert.IsType<Created<Post>>(postResult);
 
         var createdResult = (Created<Post>)postResult;
         var postId = createdResult.Value.Id;
+        var post = context.Posts.FirstOrDefault(p => p.Id == postId);
         
         var result = await PostsEndpoints.GetPost(postId, context);
         
@@ -53,14 +47,7 @@ public class PostTest
         
         await using var context = new MockDb().CreateDbContext();
         
-        var post = new PostsEndpoints.PostDto(
-            "My First Blog Post",
-            "This is the content of my first blog post.",
-            "Technology",
-            ["Tech", "Programming"]
-        );
-
-        var postResult = await PostsEndpoints.CreatePost(post, context);
+        var postResult = await SetupExamplePost(context);
 
         Assert.IsType<Created<Post>>(postResult);
         
@@ -78,14 +65,7 @@ public class PostTest
         
         await using var context = new MockDb().CreateDbContext();
         
-        var post = new PostsEndpoints.PostDto(
-            "My First Blog Post",
-            "This is the content of my first blog post.",
-            "Technology",
-            ["Tech", "Programming"]
-        );
-        
-        var postResult = await PostsEndpoints.CreatePost(post, context);
+        var postResult = await SetupExamplePost(context);
         
         Assert.IsType<Created<Post>>(postResult);
         
@@ -100,20 +80,15 @@ public class PostTest
     {
         await using var context = new MockDb().CreateDbContext();
 
-        var post = new PostsEndpoints.PostDto(
-            "My First Blog Post",
-            "This is the content of my first blog post.",
-            "Technology",
-            ["Tech", "Programming"]
-        );
-
-        var result = await PostsEndpoints.CreatePost(post, context);
+        var result = await SetupExamplePost(context);
 
         Assert.IsType<Created<Post>>(result);
 
         var createdResult = (Created<Post>)result;
 
         Assert.NotNull(createdResult.Value);
+        var post = context.Posts.FirstOrDefault(p => p.Id == createdResult.Value.Id);
+        
         Assert.Equivalent(post, createdResult.Value);
     }
 
@@ -122,14 +97,7 @@ public class PostTest
     {
         await using var context = new MockDb().CreateDbContext();
 
-        var post = new PostsEndpoints.PostDto(
-            "My First Blog Post",
-            "This is the content of my first blog post.",
-            "Technology",
-            ["Tech", "Programming"]
-        );
-
-        var postResult = await PostsEndpoints.CreatePost(post, context);
+        var postResult = await SetupExamplePost(context);
 
 
         Assert.IsType<Created<Post>>(postResult);
@@ -185,18 +153,13 @@ public class PostTest
         // Given
         await using var context = new MockDb().CreateDbContext();
 
-        var post = new PostsEndpoints.PostDto(
-            "My First Blog Post",
-            "This is the content of my first blog post.",
-            "Technology",
-            ["Tech", "Programming"]);
-        
-        var postResult = await PostsEndpoints.CreatePost(post, context);
+        var postResult = await SetupExamplePost(context);
 
 
         Assert.IsType<Created<Post>>(postResult);
 
         var createdResult = (Created<Post>)postResult;
+        Assert.NotNull(createdResult.Value);
         var postId = createdResult.Value.Id;
         // When
         var result = await PostsEndpoints.DeletePost(postId, context);
@@ -243,5 +206,17 @@ public class PostTest
         }
         
         return hasTerm;
+    }
+
+    private async Task<IResult> SetupExamplePost(SombraDb context)
+    {
+        var post = new PostsEndpoints.PostDto(
+            "My First Blog Post",
+            "This is the content of my first blog post.",
+            "Technology",
+            ["Tech", "Programming"]
+        );
+        
+        return await PostsEndpoints.CreatePost(post, context);
     }
 }
