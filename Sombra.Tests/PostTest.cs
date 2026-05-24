@@ -8,7 +8,7 @@ public class PostTest
 {
 
     [Fact]
-    public async Task GettingPostReturnsOkWithPost()
+    public async Task GetPost_WhenPostExists_ReturnsOk()
     {
         await using var context = new MockDb().CreateDbContext();
         
@@ -31,7 +31,7 @@ public class PostTest
     }
 
     [Fact]
-    public async Task GettingNonExistentPostReturnsNotFound()
+    public async Task GetPost_WhenMissing_ReturnsNotFound()
     {
         await using var context = new MockDb().CreateDbContext();
         
@@ -41,7 +41,7 @@ public class PostTest
     }
 
     [Fact]
-    public async Task GettingPostsWithSearchTermReturnsOkWithRelevantPosts()
+    public async Task GetPosts_WhenTermMatches_ReturnsOk()
     {
         var term = "tech";
         
@@ -59,7 +59,7 @@ public class PostTest
     }
     
     [Fact]
-    public async Task NonMatchingTermReturnsEmpty()
+    public async Task GetPosts_WhenTermDoesntMatch_ReturnsEmptyList()
     {
         var term = "Painting";
         
@@ -76,7 +76,7 @@ public class PostTest
     }
     
     [Fact]
-    public async Task PostingPostReturnsThePost()
+    public async Task CreatePost_ReturnsCreatedPost()
     {
         await using var context = new MockDb().CreateDbContext();
 
@@ -93,7 +93,7 @@ public class PostTest
     }
 
     [Fact]
-    public async Task UpdatingTaskReturnsTheUpdatedTask()
+    public async Task UpdatePost_ReturnsUpdatedPost()
     {
         await using var context = new MockDb().CreateDbContext();
 
@@ -131,7 +131,7 @@ public class PostTest
     }
 
     [Fact]
-    public async Task UpdatingNonExistantTaskReturnsNotFound()
+    public async Task UpdatePost_WhenMissing_ReturnsNotFound()
     {
         await using var context = new MockDb().CreateDbContext();
 
@@ -148,7 +148,7 @@ public class PostTest
     }
 
     [Fact]
-    public async Task SuccessfulDeleteReturnsNoContent()
+    public async Task DeletePost_ReturnsNoContent()
     {
         // Given
         await using var context = new MockDb().CreateDbContext();
@@ -171,7 +171,7 @@ public class PostTest
     }
 
     [Fact]
-    public async Task NonExistentPostDeleteReturnsNotFound()
+    public async Task DeletePost_WhenMissing_ReturnsNotFound()
     {
         await using var context = new MockDb().CreateDbContext();
         
