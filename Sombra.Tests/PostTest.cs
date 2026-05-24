@@ -236,9 +236,9 @@ public class PostTest
                 while (!tagFound && index < post.Tags.Count)
                 {
                     tagFound = tag.Contains(term, StringComparison.OrdinalIgnoreCase);
-                    if (tagFound) hasTerm = tagFound;
-                    index++;
                 }
+                if (tagFound) hasTerm = hasTerm && tagFound;
+                index++;  
             }
         }
         
