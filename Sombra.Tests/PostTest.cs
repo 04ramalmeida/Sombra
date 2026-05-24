@@ -200,9 +200,11 @@ public class PostTest
         var postId = createdResult.Value.Id;
         // When
         var result = await PostsEndpoints.DeletePost(postId, context);
+        var dbResult = await context.Posts.FindAsync(postId);
 
         // Then
         Assert.IsType<NoContent>(result);
+        Assert.Null(dbResult);
     }
 
     [Fact]
