@@ -29,6 +29,8 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+// Register API endpoints
+app.MapGroup("/api")
+    .MapPostsApi();
 
-app.RegisterPostsEndpoints();
 app.Run();

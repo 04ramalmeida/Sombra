@@ -20,9 +20,9 @@ public static class PostsEndpoints
         List<string> Tags
     );
 
-    public static void RegisterPostsEndpoints(this WebApplication app)
+    public static RouteGroupBuilder MapPostsApi(this RouteGroupBuilder group)
     {
-        var posts = app.MapGroup("/posts");
+        var posts = group.MapGroup("/posts");
 
         posts.MapGet("/", GetPosts);
         posts.MapGet("/{id}", GetPost);
@@ -30,6 +30,7 @@ public static class PostsEndpoints
         posts.MapPut("/{id}", UpdatePost);
         posts.MapDelete("/{id}", DeletePost);
 
+        return posts;
     }
 
     internal static async Task<IResult> GetPosts(string? searchTerm, SombraDb db)
