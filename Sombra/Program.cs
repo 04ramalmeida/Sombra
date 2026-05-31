@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Sombra.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DockerConnection");

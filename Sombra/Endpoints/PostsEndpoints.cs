@@ -1,9 +1,10 @@
-
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore;
 
 [assembly: InternalsVisibleTo("Sombra.Tests")]
+namespace Sombra.Endpoints;
+
 public static class PostsEndpoints
 {
 
@@ -43,9 +44,9 @@ public static class PostsEndpoints
 
         // To find a better solution for case insensitivity
         var results = await db.Posts.Where(p => p.Title.ToLower().Contains(searchTerm) ||
-                            p.Content.ToLower().Contains(searchTerm) ||
-                            p.Category.ToLower().Contains(searchTerm)
-                            ).ToListAsync();
+                                                p.Content.ToLower().Contains(searchTerm) ||
+                                                p.Category.ToLower().Contains(searchTerm)
+        ).ToListAsync();
 
         return TypedResults.Ok(results);
     }
