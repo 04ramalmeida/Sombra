@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Sombra.Endpoints;
+namespace Sombra.Models.DTOs;
 
 public record PostDto(
     [property: Required]
