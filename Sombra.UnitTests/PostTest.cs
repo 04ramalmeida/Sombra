@@ -2,7 +2,7 @@ using Sombra.Models.DTOs;
 using Sombra.Services;
 
 
-namespace Sombra.Tests;
+namespace Sombra.UnitTests;
 
 public class PostTest
 {

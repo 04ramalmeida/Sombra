@@ -5,7 +5,7 @@ VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sombra", "Sombra\Sombra.csproj", "{4594F454-6FD7-4ACB-B4BD-3D6A8391C98E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sombra.Tests", "Sombra.Tests\Sombra.Tests.csproj", "{6350B16B-3A09-4E95-BE48-1C486F070D22}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sombra.UnitTests", "Sombra.UnitTests\Sombra.UnitTests.csproj", "{6350B16B-3A09-4E95-BE48-1C486F070D22}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
