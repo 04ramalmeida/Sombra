@@ -1,126 +1,125 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Sombra.Endpoints;
-using Xunit.Internal;
+using Sombra.Models.DTOs;
+using Sombra.Services;
+
 
 namespace Sombra.Tests;
 
 public class PostTest
 {
-
-    [Fact]
-    public async Task GetPost_WhenPostExists_ReturnsOk()
+    private Post CreateExamplePost() => new()
     {
-        await using var context = new MockDb().CreateDbContext();
-        
-        var postResult = await SetupExamplePost(context);
-        
-        Assert.IsType<Created<Post>>(postResult);
+        Title = "My First Blog Post",
+        Content = "This is the content of my first blog post.",
+        Category = "Technology",
+        Tags = new List<string> { "Tech", "Programming" }
+    };
 
-        var createdResult = (Created<Post>)postResult;
-        var postId = createdResult.Value.Id;
-        var post = context.Posts.FirstOrDefault(p => p.Id == postId);
+    private static (SombraDb, PostService) SetupContext()
+    {
+        var context = new MockDb().CreateDbContext();
         
-        var result = await PostsEndpoints.GetPost(postId, context);
+        return (context, new PostService(context));
+    }
+
+    private static PostService SetupService()
+    {
+        var context = new MockDb().CreateDbContext();
         
-        Assert.IsType<Ok<Post>>(result);
+        return (new PostService(context));
+    }
+    
+    [Fact]
+    public async Task GetPost_WhenPostExists_ReturnsCorrectPost()
+    {
+        var (context, postService) = SetupContext();
         
-        var getResult = (Ok<Post>)result;
+        var post = await SetupExamplePost(context);
         
-        Assert.NotNull(getResult.Value);
-        Assert.Equivalent(post, getResult.Value);
+        Assert.IsType<Post>(post);
+        
+        var result = await postService.GetPostAsync(post.Id);
+        
+        Assert.IsType<Post>(result);
+        
+        Assert.Equivalent(post, result);
     }
 
     [Fact]
-    public async Task GetPost_WhenMissing_ReturnsNotFound()
+    public async Task GetPost_WhenMissing_ReturnsNull()
     {
-        await using var context = new MockDb().CreateDbContext();
+        var postService = SetupService();
         
-        var result = await PostsEndpoints.GetPost(1, context);
+        var result = await postService.GetPostAsync(1);
         
-        Assert.IsType<NotFound>(result);
+        Assert.Null(result);
     }
 
     [Fact]
     public async Task GetPosts_WhenTermMatches_ReturnsOk()
     {
-        var term = "tech";
+        var (context, postService) = SetupContext();
         
-        await using var context = new MockDb().CreateDbContext();
+        const string term = "tech";
         
-        var postResult = await SetupExamplePost(context);
+        var post= await SetupExamplePost(context);
 
-        Assert.IsType<Created<Post>>(postResult);
+        Assert.IsType<Post>(post);
         
-        var result = await PostsEndpoints.GetPosts(term, context);
+        var result = await postService.GetPostsAsync(term);
         
-        var okResult = Assert.IsType<Ok<List<Post>>>(result);
-        Assert.NotEmpty(okResult.Value);
-        Assert.True(PostsContainsTerm(term, okResult.Value));
+        Assert.IsType<List<Post>>(result);
+        Assert.True(PostsContainsTerm(term, result));
     }
     
     [Fact]
     public async Task GetPosts_WhenTermDoesntMatch_ReturnsEmptyList()
     {
-        var term = "Painting";
+        var (context, postService) = SetupContext();
         
-        await using var context = new MockDb().CreateDbContext();
+        const string term = "Painting";
         
         var postResult = await SetupExamplePost(context);
         
-        Assert.IsType<Created<Post>>(postResult);
+        Assert.IsType<Post>(postResult);
         
-        var result = await PostsEndpoints.GetPosts(term, context);
-        var getResult = Assert.IsType<Ok<List<Post>>>(result);
-        
-        Assert.Empty(getResult.Value);
+        var result = await postService.GetPostsAsync(term);
+        Assert.IsType<List<Post>>(result);
+        Assert.Empty(result);
     }
     
     [Fact]
     public async Task CreatePost_ReturnsCreatedPost()
     {
-        await using var context = new MockDb().CreateDbContext();
-
-        var result = await SetupExamplePost(context);
-
-        Assert.IsType<Created<Post>>(result);
-
-        var createdResult = (Created<Post>)result;
-
-        Assert.NotNull(createdResult.Value);
-        var post = context.Posts.FirstOrDefault(p => p.Id == createdResult.Value.Id);
+        var (context, postService) = SetupContext();
         
-        Assert.Equivalent(post, createdResult.Value);
+        var post = await postService.CreatePostAsync(CreateExamplePost());
+        
+        Assert.NotNull(post);
+        var dbPost = context.Posts.FirstOrDefault(p => p.Id == post.Id);
+        
+        Assert.Equivalent(post, dbPost);
     }
 
     [Fact]
     public async Task UpdatePost_ReturnsUpdatedPost()
     {
-        await using var context = new MockDb().CreateDbContext();
+        var (context, postService) = SetupContext();
 
-        var postResult = await SetupExamplePost(context);
+        var post = await SetupExamplePost(context);
+        
+        var postId = post.Id;
 
-
-        Assert.IsType<Created<Post>>(postResult);
-
-        var createdResult = (Created<Post>)postResult;
-        var postId = createdResult.Value.Id;
-
-        var update = new PostsEndpoints.PostDto(
+        var update = new PostDto(
             "My Updated Blog Post",
             "This is the updated content of my first blog post.",
             "Technology",
             ["Tech", "Programming"]
         );
 
-        var result = await PostsEndpoints.UpdatePost(postId, update, context);
+        var result = await postService.UpdatePostAsync(post, update);
 
-        Assert.IsType<Ok<Post>>(result);
-
-        var updatedResult = (Ok<Post>)result;
-
-        Assert.NotNull(updatedResult.Value);
-        Assert.Equivalent(update, updatedResult.Value);
+        Assert.IsType<Post>(result);
+        Assert.Equivalent(update, result);
         
         var dbResult = context.Posts.FirstOrDefault(p => p.Id == postId);
         
@@ -132,58 +131,21 @@ public class PostTest
     }
 
     [Fact]
-    public async Task UpdatePost_WhenMissing_ReturnsNotFound()
-    {
-        await using var context = new MockDb().CreateDbContext();
-
-        var update = new PostsEndpoints.PostDto(
-            "My Updated Blog Post",
-            "This is the updated content of my first blog post.",
-            "Technology",
-            ["Tech", "Programming"]
-        );
-
-        var result = await PostsEndpoints.UpdatePost(1, update, context);
-
-        Assert.IsType<NotFound>(result);
-    }
-
-    [Fact]
-    public async Task DeletePost_ReturnsNoContent()
+    public async Task DeletePost_DeletesThePost()
     {
         // Given
-        await using var context = new MockDb().CreateDbContext();
+        var (context, postService) = SetupContext();
 
-        var postResult = await SetupExamplePost(context);
+        var post = await SetupExamplePost(context);
 
-
-        Assert.IsType<Created<Post>>(postResult);
-
-        var createdResult = (Created<Post>)postResult;
-        Assert.NotNull(createdResult.Value);
-        var postId = createdResult.Value.Id;
+        var postId = post.Id;
         // When
-        var result = await PostsEndpoints.DeletePost(postId, context);
+        await postService.RemovePostAsync(post);
         var dbResult = await context.Posts.FindAsync(postId);
-
-        // Then
-        Assert.IsType<NoContent>(result);
+        
         Assert.Null(dbResult);
     }
-
-    [Fact]
-    public async Task DeletePost_WhenMissing_ReturnsNotFound()
-    {
-        await using var context = new MockDb().CreateDbContext();
-        
-        var result = await PostsEndpoints.DeletePost(1, context);
-        var searchResult = context.Posts.FirstOrDefault(p => p.Id == 1);
-        
-        Assert.IsType<NotFound>(result);
-        Assert.Null(searchResult);
-        
-    }
-
+    
     private bool PostsContainsTerm(string term, List<Post> posts)
     {
         bool hasTerm = false;
@@ -209,15 +171,11 @@ public class PostTest
         return hasTerm;
     }
 
-    private async Task<IResult> SetupExamplePost(SombraDb context)
+    private async Task<Post> SetupExamplePost(SombraDb context)
     {
-        var post = new PostsEndpoints.PostDto(
-            "My First Blog Post",
-            "This is the content of my first blog post.",
-            "Technology",
-            ["Tech", "Programming"]
-        );
-        
-        return await PostsEndpoints.CreatePost(post, context);
+        var post = CreateExamplePost();
+        await context.Posts.AddAsync(post);
+        await context.SaveChangesAsync();
+        return post;
     }
 }
