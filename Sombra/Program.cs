@@ -1,10 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using Sombra.Endpoints;
+using Sombra.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DockerConnection");
 builder.Services.AddDbContext<SombraDb>(opt => opt.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+builder.Services.AddScoped<PostService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApiDocument(config =>
@@ -29,6 +31,7 @@ if (app.Environment.IsDevelopment())
         config.DocExpansion = "list";
     });
 }
+
 
 // Register API endpoints
 app.MapGroup("/api")

@@ -1,26 +1,13 @@
-using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore;
+using Sombra.Models.DTOs;
+using Sombra.Services;
 
-[assembly: InternalsVisibleTo("Sombra.Tests")]
+[assembly: InternalsVisibleTo("Sombra.UnitTests")]
 namespace Sombra.Endpoints;
 
 public static class PostsEndpoints
 {
-
-    public record PostDto(
-        [property: Required]
-        [property: StringLength(64, MinimumLength = 8)]
-        string Title,
-        [property: Required]
-        string Content,
-        [property: Required]
-        [property: StringLength(24)]
-        string Category,
-        [property: MaxLength(10)]
-        List<string> Tags
-    );
-
     public static RouteGroupBuilder MapPostsApi(this RouteGroupBuilder group)
     {
         var posts = group.MapGroup("/posts");
@@ -34,32 +21,20 @@ public static class PostsEndpoints
         return posts;
     }
 
-    internal static async Task<IResult> GetPosts(string? searchTerm, SombraDb db)
+    internal static async Task<IResult> GetPosts(string? searchTerm, PostService postService)
     {
-        if (string.IsNullOrEmpty(searchTerm))
-        {
-            var posts = await db.Posts.ToListAsync();
-            return TypedResults.Ok(posts);
-        }
-
-        // To find a better solution for case insensitivity
-        var results = await db.Posts.Where(p => p.Title.ToLower().Contains(searchTerm) ||
-                                                p.Content.ToLower().Contains(searchTerm) ||
-                                                p.Category.ToLower().Contains(searchTerm)
-        ).ToListAsync();
-
-        return TypedResults.Ok(results);
+        return TypedResults.Ok(await postService.GetPostsAsync(searchTerm));
     }
 
-    internal static async Task<IResult> GetPost(int id, SombraDb db)
+    internal static async Task<IResult> GetPost(int id, PostService postService)
     {
-        var post = await db.Posts.FindAsync(id);
+        var post = await postService.GetPostAsync(id);
         if (post is null) return TypedResults.NotFound();
 
         return TypedResults.Ok(post);
     }
 
-    internal static async Task<IResult> CreatePost(PostDto input, SombraDb db)
+    internal static async Task<IResult> CreatePost(PostDto input, PostService postService)
     {
         var post = new Post
         {
@@ -69,33 +44,27 @@ public static class PostsEndpoints
             Tags = input.Tags.ToList()
         };
 
-        db.Posts.Add(post);
-        await db.SaveChangesAsync();
+        var result = await postService.CreatePostAsync(post);
 
-        return TypedResults.Created($"/posts/{post.Id}", post);
+        return TypedResults.Created($"/posts/{result.Id}", result);
     }
 
-    internal static async Task<IResult> UpdatePost(int id, PostDto input, SombraDb db)
+    internal static async Task<IResult> UpdatePost(int id, PostDto input, PostService postService)
     {
-        var post = await db.Posts.FindAsync(id);
+        var post = await postService.GetPostAsync(id);
         if (post is null) return TypedResults.NotFound();
 
-        post.Title = input.Title;
-        post.Content = input.Content;
-        post.Category = input.Category;
-        post.Tags = input.Tags.ToList();
-
-        await db.SaveChangesAsync();
-        return TypedResults.Ok(post);
+        var result = await postService.UpdatePostAsync(post, input);
+        
+        return TypedResults.Ok(result);
     }
 
-    internal static async Task<IResult> DeletePost(int id, SombraDb db)
+    internal static async Task<IResult> DeletePost(int id, PostService postService)
     {
-        var post = await db.Posts.FindAsync(id);
+        var post = await postService.GetPostAsync(id);
         if (post is null) return TypedResults.NotFound();
 
-        db.Posts.Remove(post);
-        await db.SaveChangesAsync();
+        await postService.RemovePostAsync(post);
         return TypedResults.NoContent();
     }
 }
