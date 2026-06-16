@@ -1,5 +1,6 @@
 using Sombra.Models.DTOs;
 using Sombra.Services;
+using Sombra.Utils;
 
 
 namespace Sombra.UnitTests;
@@ -68,7 +69,7 @@ public class PostTest
         var result = await postService.GetPostsAsync(term);
         
         Assert.IsType<List<Post>>(result);
-        Assert.True(PostsContainsTerm(term, result));
+        Assert.True(PostUtils.PostsContainsTerm(term, result));
     }
     
     [Fact]
@@ -144,31 +145,6 @@ public class PostTest
         var dbResult = await context.Posts.FindAsync(postId);
         
         Assert.Null(dbResult);
-    }
-    
-    private bool PostsContainsTerm(string term, List<Post> posts)
-    {
-        bool hasTerm = false;
-
-        foreach (var post in posts)
-        {
-            hasTerm = post.Title.Contains(term, StringComparison.OrdinalIgnoreCase);
-            hasTerm = hasTerm || post.Content.Contains(term, StringComparison.OrdinalIgnoreCase);
-            hasTerm = hasTerm || post.Category.Contains(term, StringComparison.OrdinalIgnoreCase);
-            bool tagFound = false;
-            for (var index = 0; index < post.Tags.Count; )
-            {
-                var tag = post.Tags[index];
-                while (!tagFound && index < post.Tags.Count)
-                {
-                    tagFound = tag.Contains(term, StringComparison.OrdinalIgnoreCase);
-                }
-                if (tagFound) hasTerm = hasTerm && tagFound;
-                index++;  
-            }
-        }
-        
-        return hasTerm;
     }
 
     private async Task<Post> SetupExamplePost(SombraDb context)
