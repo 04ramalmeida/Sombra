@@ -21,12 +21,12 @@ public static class PostsEndpoints
         return posts;
     }
 
-    internal static async Task<IResult> GetPosts(string? searchTerm, PostService postService)
+    private static async Task<IResult> GetPosts(string? searchTerm, PostService postService)
     {
         return TypedResults.Ok(await postService.GetPostsAsync(searchTerm));
     }
 
-    internal static async Task<IResult> GetPost(int id, PostService postService)
+    private static async Task<IResult> GetPost(int id, PostService postService)
     {
         var post = await postService.GetPostAsync(id);
         if (post is null) return TypedResults.NotFound();
@@ -34,7 +34,7 @@ public static class PostsEndpoints
         return TypedResults.Ok(post);
     }
 
-    internal static async Task<IResult> CreatePost(PostDto input, PostService postService)
+    private static async Task<IResult> CreatePost(PostDto input, PostService postService)
     {
         var post = new Post
         {
@@ -49,7 +49,7 @@ public static class PostsEndpoints
         return TypedResults.Created($"/posts/{result.Id}", result);
     }
 
-    internal static async Task<IResult> UpdatePost(int id, PostDto input, PostService postService)
+    private static async Task<IResult> UpdatePost(int id, PostDto input, PostService postService)
     {
         var post = await postService.GetPostAsync(id);
         if (post is null) return TypedResults.NotFound();
@@ -59,7 +59,7 @@ public static class PostsEndpoints
         return TypedResults.Ok(result);
     }
 
-    internal static async Task<IResult> DeletePost(int id, PostService postService)
+    private static async Task<IResult> DeletePost(int id, PostService postService)
     {
         var post = await postService.GetPostAsync(id);
         if (post is null) return TypedResults.NotFound();
