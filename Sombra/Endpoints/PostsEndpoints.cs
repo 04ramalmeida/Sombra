@@ -21,9 +21,9 @@ public static class PostsEndpoints
         return posts;
     }
 
-    private static async Task<IResult> GetPosts(string? searchTerm, PostService postService)
+    private static async Task<IResult> GetPosts(string? term, PostService postService)
     {
-        return TypedResults.Ok(await postService.GetPostsAsync(searchTerm));
+        return TypedResults.Ok(await postService.GetPostsAsync(term));
     }
 
     private static async Task<IResult> GetPost(int id, PostService postService)
