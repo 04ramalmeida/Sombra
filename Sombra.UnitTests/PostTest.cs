@@ -7,13 +7,6 @@ namespace Sombra.UnitTests;
 
 public class PostTest
 {
-    private Post CreateExamplePost() => new()
-    {
-        Title = "My First Blog Post",
-        Content = "This is the content of my first blog post.",
-        Category = "Technology",
-        Tags = new List<string> { "Tech", "Programming" }
-    };
 
     private static (SombraDb, PostService) SetupContext()
     {
@@ -93,7 +86,7 @@ public class PostTest
     {
         var (context, postService) = SetupContext();
         
-        var post = await postService.CreatePostAsync(CreateExamplePost());
+        var post = await postService.CreatePostAsync(PostUtils.ExamplePost());
         
         Assert.NotNull(post);
         var dbPost = context.Posts.FirstOrDefault(p => p.Id == post.Id);
@@ -149,7 +142,7 @@ public class PostTest
 
     private async Task<Post> SetupExamplePost(SombraDb context)
     {
-        var post = CreateExamplePost();
+        var post = PostUtils.ExamplePost();
         await context.Posts.AddAsync(post);
         await context.SaveChangesAsync();
         return post;

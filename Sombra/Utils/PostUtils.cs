@@ -26,4 +26,12 @@ public class PostUtils
         
         return hasTerm;
     }
+    
+    public static Post ExamplePost() => new()
+    {
+        Title = "My First Blog Post",
+        Content = "This is the content of my first blog post.",
+        Category = "Technology",
+        Tags = ["Tech", "Programming"]
+    };
 }
