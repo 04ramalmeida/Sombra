@@ -11,17 +11,12 @@ public class PostUtils
             hasTerm = post.Title.Contains(term, StringComparison.OrdinalIgnoreCase);
             hasTerm = hasTerm || post.Content.Contains(term, StringComparison.OrdinalIgnoreCase);
             hasTerm = hasTerm || post.Category.Contains(term, StringComparison.OrdinalIgnoreCase);
-            bool tagFound = false;
-            for (var index = 0; index < post.Tags.Count; )
-            {
-                var tag = post.Tags[index];
-                while (!tagFound && index < post.Tags.Count)
-                {
-                    tagFound = tag.Contains(term, StringComparison.OrdinalIgnoreCase);
-                }
-                if (tagFound) hasTerm = hasTerm && tagFound;
-                index++;  
-            }
+            // TODO: Uncomment when tags have been reworked
+            // for (var index = 0; index < post.Tags.Count; index++)
+            // {
+            //     var tag = post.Tags[index];
+            //     hasTerm = hasTerm || tag.Contains(term, StringComparison.OrdinalIgnoreCase);
+            // }
         }
         
         return hasTerm;
