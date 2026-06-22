@@ -213,3 +213,5 @@ FakesAssemblies/
 appsettings*.json
 
 .idea/
+
+Sombra.WorkLog/
