@@ -127,4 +127,20 @@ public class PostEndpointsTests: IClassFixture<TestWebApplicationFactory<Program
         
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+
+    [Fact]
+    public async Task DeletePost_WhenPostExists_ReturnsNoContent()
+    {
+        var response = await _client.DeleteAsync("/api/posts/1");
+        
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task DeletePost_WhenPostDoesNotExist_ReturnsNotFound()
+    {
+        var response = await _client.DeleteAsync("/api/posts/50868795");
+        
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
 }
