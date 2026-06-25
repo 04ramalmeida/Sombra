@@ -78,4 +78,53 @@ public class PostEndpointsTests: IClassFixture<TestWebApplicationFactory<Program
         
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
+
+    [Fact]
+    public async Task UpdatePost_WhenInputValid_ReturnsUpdatedPost()
+    {
+        var input = new PostDto(
+            "Updated Test Post",
+            "This is the content of a post updated by an integration test.",
+            "Test",
+            ["Test"]);
+        
+        var response = await _client.PutAsJsonAsync("/api/posts/1", input);
+        
+        var post = await response.Content.ReadFromJsonAsync<Post>();
+        
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.NotNull(post);
+        Assert.Equal(input.Title, post.Title);
+        Assert.Equal(input.Content, post.Content);
+        Assert.Equal(input.Category, post.Category);
+        Assert.Equal(input.Tags, post.Tags);
+    }
+
+    [Fact]
+    public async Task UpdatePost_WhenInputInvalid_ReturnsBadRequest()
+    {
+        var input = new PostDto(
+            "BadTitle",
+            "This is the content of a post update by an integration test.",
+            "This is a very long and extensive category name, and it won't pass validation",
+            ["Test"]);
+        
+        var response = await _client.PutAsJsonAsync("/api/posts/1", input);
+        
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task UpdatePost_WhenPostNotExist_ReturnsNotFound()
+    {
+        var input = new PostDto(
+            "Updated Test Post",
+            "This is the content of a post updated by an integration test.",
+            "Test",
+            ["Test"]);
+        
+        var response = await _client.PutAsJsonAsync("/api/posts/50868795", input);
+        
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
 }
