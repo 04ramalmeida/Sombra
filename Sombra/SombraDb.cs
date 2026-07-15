@@ -1,4 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Sombra.Models.Entities;
+
+namespace Sombra;
 
 public class SombraDb : DbContext
 {
@@ -6,4 +9,6 @@ public class SombraDb : DbContext
         : base(options) { }
 
     public DbSet<Post> Posts => Set<Post>();
+    
+    public DbSet<Tag> Tags => Set<Tag>();
 }
