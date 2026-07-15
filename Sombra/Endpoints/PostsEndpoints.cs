@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
-using Microsoft.EntityFrameworkCore;
 using Sombra.Models.DTOs;
 using Sombra.Services;
+using Sombra.Utils;
 
 [assembly: InternalsVisibleTo("Sombra.UnitTests")]
 namespace Sombra.Endpoints;
@@ -28,40 +28,45 @@ public static class PostsEndpoints
 
     private static async Task<IResult> GetPost(int id, PostService postService)
     {
-        var post = await postService.GetPostAsync(id);
+        var post = await postService.GetPostDtoAsync(id);
         if (post is null) return TypedResults.NotFound();
 
         return TypedResults.Ok(post);
     }
 
-    private static async Task<IResult> CreatePost(PostDto input, PostService postService)
+    private static async Task<IResult> CreatePost(CreatePostDto input,
+        PostService postService)
     {
         var post = new Post
         {
             Title = input.Title,
             Content = input.Content,
             Category = input.Category,
-            Tags = input.Tags.ToList()
+            Tags = postService.GetOrCreateTags(input.Tags)
         };
 
         var result = await postService.CreatePostAsync(post);
 
-        return TypedResults.Created($"/posts/{result.Id}", result);
+        var dto = PostUtils.ToDto(result);
+        
+        return TypedResults.Created($"/posts/{result.Id}", dto);
     }
 
-    private static async Task<IResult> UpdatePost(int id, PostDto input, PostService postService)
+    private static async Task<IResult> UpdatePost(int id, CreatePostDto input, PostService postService)
     {
-        var post = await postService.GetPostAsync(id);
+        var post = await postService.GetPostByIdAsync(id);
         if (post is null) return TypedResults.NotFound();
 
         var result = await postService.UpdatePostAsync(post, input);
         
-        return TypedResults.Ok(result);
+        var dto = PostUtils.ToDto(result);
+        
+        return TypedResults.Ok(dto);
     }
 
     private static async Task<IResult> DeletePost(int id, PostService postService)
     {
-        var post = await postService.GetPostAsync(id);
+        var post = await postService.GetPostByIdAsync(id);
         if (post is null) return TypedResults.NotFound();
 
         await postService.RemovePostAsync(post);
