@@ -1,6 +1,9 @@
+using System.Text.Json.Serialization;
+using Sombra.Models.Entities;
+
 public class Post
 {
-    public int Id { get; set; }
+    public int Id { get; init; }
 
     public required string Title { get; set; }
 
@@ -8,5 +11,6 @@ public class Post
 
     public required string Category { get; set; }
 
-    public required List<string> Tags { get; set; }
+    [JsonIgnore]
+    public List<Tag> Tags { get; set; } = [];
 }
