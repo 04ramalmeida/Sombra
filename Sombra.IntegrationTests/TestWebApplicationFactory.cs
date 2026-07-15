@@ -39,7 +39,7 @@ public class TestWebApplicationFactory<TProgram>
             services.AddDbContext<SombraDb>(options =>
             {
                 options.UseSqlServer(connectionString)
-                    .UseSeeding((context, _) => DbSeeder.CreatePosts(context));
+                    .UseSeeding((context, _) => DbSeeder.InitDb(context));
             });
         });
         
