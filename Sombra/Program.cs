@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Sombra;
 using Sombra.Endpoints;
 using Sombra.Services;
 
