@@ -31,11 +31,11 @@ public class PostTest
         
         Assert.IsType<Post>(post);
         
-        var result = await postService.GetPostAsync(post.Id);
+        var result = await postService.GetPostDtoAsync(post.Id);
         
-        Assert.IsType<Post>(result);
+        Assert.IsType<PostResponseDto>(result);
         
-        Assert.Equivalent(post, result);
+        Assert.Equivalent(PostUtils.ExamplePostDto(), result);
     }
 
     [Fact]
@@ -43,7 +43,7 @@ public class PostTest
     {
         var postService = SetupService();
         
-        var result = await postService.GetPostAsync(1);
+        var result = await postService.GetPostDtoAsync(1);
         
         Assert.Null(result);
     }
@@ -61,7 +61,7 @@ public class PostTest
         
         var result = await postService.GetPostsAsync(term);
         
-        Assert.IsType<List<Post>>(result);
+        Assert.IsType<List<PostResponseDto>>(result);
         Assert.True(PostUtils.PostsContainsTerm(term, result));
     }
     
@@ -77,7 +77,7 @@ public class PostTest
         Assert.IsType<Post>(postResult);
         
         var result = await postService.GetPostsAsync(term);
-        Assert.IsType<List<Post>>(result);
+        Assert.IsType<List<PostResponseDto>>(result);
         Assert.Empty(result);
     }
     
@@ -103,7 +103,7 @@ public class PostTest
         
         var postId = post.Id;
 
-        var update = new PostDto(
+        var update = new CreatePostDto(
             "My Updated Blog Post",
             "This is the updated content of my first blog post.",
             "Technology",
@@ -113,7 +113,6 @@ public class PostTest
         var result = await postService.UpdatePostAsync(post, update);
 
         Assert.IsType<Post>(result);
-        Assert.Equivalent(update, result);
         
         var dbResult = context.Posts.FirstOrDefault(p => p.Id == postId);
         
@@ -121,7 +120,7 @@ public class PostTest
         Assert.Equivalent(update.Title, dbResult.Title);
         Assert.Equivalent(update.Content, dbResult.Content);
         Assert.Equivalent(update.Category, dbResult.Category);
-        Assert.Equivalent(update.Tags, dbResult.Tags);
+        Assert.Equivalent(update.Tags, dbResult.Tags.Select(t=>t.Name));
     }
 
     [Fact]

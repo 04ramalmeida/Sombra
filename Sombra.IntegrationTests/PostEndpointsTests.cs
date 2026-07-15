@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.Extensions.DependencyInjection;
 using Sombra.Models.DTOs;
 using Sombra.Services;
 using Sombra.Utils;
@@ -11,16 +12,19 @@ public class PostEndpointsTests: IClassFixture<TestWebApplicationFactory<Program
 {
     private readonly TestWebApplicationFactory<Program> _factory;
     private readonly HttpClient _client;
+    private readonly SombraDb _context;
 
     public PostEndpointsTests(TestWebApplicationFactory<Program> factory)
     {
         _factory = factory;
+        var scope = _factory.Services.CreateScope();
+        _context = scope.ServiceProvider.GetRequiredService<SombraDb>();
         _client = factory.CreateClient();
     }
 
 
     [Fact]
-    public async Task GetPosts_ReturnsOkandPosts()
+    public async Task GetPosts_ReturnsOkAndPosts()
     {
         var response = await _client.GetAsync("/api/posts");
         
@@ -31,11 +35,11 @@ public class PostEndpointsTests: IClassFixture<TestWebApplicationFactory<Program
     }
 
     [Fact]
-    public async Task GetPosts_WhenTermIncluded_ReturnsOkandPosts()
+    public async Task GetPosts_WhenTermIncluded_ReturnsOkAndPosts()
     {
         var response = await _client.GetAsync("/api/posts?term=tech");
         
-        var posts = await response.Content.ReadFromJsonAsync<List<Post>>();
+        var posts = await response.Content.ReadFromJsonAsync<List<PostResponseDto>>();
         
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.NotNull(posts);
@@ -46,7 +50,7 @@ public class PostEndpointsTests: IClassFixture<TestWebApplicationFactory<Program
     [Fact]
     public async Task CreatePost_WhenInputValid_ReturnsCreatedPost()
     {
-        var input = new PostDto(
+        var input = new CreatePostDto(
             "Created Test Post",
             "This is the content of a post created by an integration test.",
             "Test",
@@ -55,7 +59,7 @@ public class PostEndpointsTests: IClassFixture<TestWebApplicationFactory<Program
         
         var response = await _client.PostAsJsonAsync("/api/posts", input);
         
-        var post = await response.Content.ReadFromJsonAsync<Post>();
+        var post = await response.Content.ReadFromJsonAsync<PostResponseDto>();
         
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         Assert.NotNull(post);
@@ -68,7 +72,7 @@ public class PostEndpointsTests: IClassFixture<TestWebApplicationFactory<Program
     [Fact]
     public async Task CreatePost_WhenInputInvalid_ReturnsBadRequest()
     {
-        var input = new PostDto(
+        var input = new CreatePostDto(
             "BadTitle",
             "This is the content of a post created by an integration test.",
             "This is a very long and extensive category name, and it won't pass validation",
@@ -82,17 +86,22 @@ public class PostEndpointsTests: IClassFixture<TestWebApplicationFactory<Program
     [Fact]
     public async Task UpdatePost_WhenInputValid_ReturnsUpdatedPost()
     {
-        var input = new PostDto(
+        var input = new CreatePostDto(
             "Updated Test Post",
             "This is the content of a post updated by an integration test.",
             "Test",
-            ["Test"]);
+            ["NewTag"]);
         
-        var response = await _client.PutAsJsonAsync("/api/posts/1", input);
+        Post? dbPost = _context.Posts.FirstOrDefault();
         
-        var post = await response.Content.ReadFromJsonAsync<Post>();
+        Assert.NotNull(dbPost);
+        
+        var response = await _client.PutAsJsonAsync($"/api/posts/{dbPost.Id}", input);
         
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        
+        var post = await response.Content.ReadFromJsonAsync<PostResponseDto>();
+        
         Assert.NotNull(post);
         Assert.Equal(input.Title, post.Title);
         Assert.Equal(input.Content, post.Content);
@@ -103,13 +112,15 @@ public class PostEndpointsTests: IClassFixture<TestWebApplicationFactory<Program
     [Fact]
     public async Task UpdatePost_WhenInputInvalid_ReturnsBadRequest()
     {
-        var input = new PostDto(
+        var input = new CreatePostDto(
             "BadTitle",
             "This is the content of a post update by an integration test.",
             "This is a very long and extensive category name, and it won't pass validation",
             ["Test"]);
         
-        var response = await _client.PutAsJsonAsync("/api/posts/1", input);
+        
+        
+        var response = await _client.PutAsJsonAsync("/api/posts/2", input);
         
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
@@ -117,7 +128,7 @@ public class PostEndpointsTests: IClassFixture<TestWebApplicationFactory<Program
     [Fact]
     public async Task UpdatePost_WhenPostNotExist_ReturnsNotFound()
     {
-        var input = new PostDto(
+        var input = new CreatePostDto(
             "Updated Test Post",
             "This is the content of a post updated by an integration test.",
             "Test",
@@ -131,7 +142,11 @@ public class PostEndpointsTests: IClassFixture<TestWebApplicationFactory<Program
     [Fact]
     public async Task DeletePost_WhenPostExists_ReturnsNoContent()
     {
-        var response = await _client.DeleteAsync("/api/posts/1");
+        Post? post = _context.Posts.FirstOrDefault();
+        
+        Assert.NotNull(post);
+        
+        var response = await _client.DeleteAsync($"/api/posts/{post.Id}");
         
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
     }
