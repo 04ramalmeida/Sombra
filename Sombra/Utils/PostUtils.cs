@@ -1,8 +1,11 @@
+using Sombra.Models.DTOs;
+using Sombra.Models.Entities;
+
 namespace Sombra.Utils;
 
 public class PostUtils
 {
-    public static bool PostsContainsTerm(string term, List<Post> posts)
+    public static bool PostsContainsTerm(string term, List<PostResponseDto> posts)
     {
         bool hasTerm = false;
 
@@ -27,6 +30,20 @@ public class PostUtils
         Title = "My First Blog Post",
         Content = "This is the content of my first blog post.",
         Category = "Technology",
-        Tags = ["Tech", "Programming"]
+        Tags = [new Tag("Tech")]
     };
+
+    public static CreatePostDto ExamplePostDto() => new CreatePostDto(
+        "My First Blog Post",
+        "This is the content of my first blog post.",
+        "Technology",
+        ["Tech"]
+    );
+
+    public static PostResponseDto ToDto(Post post) => new PostResponseDto(
+        post.Id,
+        post.Title,
+        post.Content,
+        post.Category,
+        post.Tags.Select(tag => tag.Name).ToList());
 }
