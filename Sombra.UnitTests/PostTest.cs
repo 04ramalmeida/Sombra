@@ -59,7 +59,10 @@ public class PostTest
 
         Assert.IsType<Post>(post);
         
-        var result = await postService.GetPostsAsync(term);
+        var result = await postService.GetPostsAsync(new QueryParams
+        {
+            SearchTerm = term
+        });
         
         Assert.IsType<List<PostResponseDto>>(result);
         Assert.True(PostUtils.PostsContainsTerm(term, result, context));
@@ -76,7 +79,10 @@ public class PostTest
         
         Assert.IsType<Post>(postResult);
         
-        var result = await postService.GetPostsAsync(term);
+        var result = await postService.GetPostsAsync(new QueryParams
+        {
+            SearchTerm = term
+        });
         Assert.IsType<List<PostResponseDto>>(result);
         Assert.Empty(result);
     }
