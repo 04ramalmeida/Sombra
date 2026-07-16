@@ -62,7 +62,7 @@ public class PostTest
         var result = await postService.GetPostsAsync(term);
         
         Assert.IsType<List<PostResponseDto>>(result);
-        Assert.True(PostUtils.PostsContainsTerm(term, result));
+        Assert.True(PostUtils.PostsContainsTerm(term, result, context));
     }
     
     [Fact]

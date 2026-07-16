@@ -44,7 +44,7 @@ public class PostEndpointsTests: IClassFixture<TestWebApplicationFactory<Program
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.NotNull(posts);
         Assert.NotEmpty(posts);
-        Assert.True(PostUtils.PostsContainsTerm("tech", posts));
+        Assert.True(PostUtils.PostsContainsTerm("tech", posts, _context));
     }
 
     [Fact]
