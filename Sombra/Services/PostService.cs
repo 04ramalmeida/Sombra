@@ -23,9 +23,11 @@ public class PostService(SombraDb db)
                 .ToListAsync();
         }
         
-        return await db.Posts.Where(p => p.Title.ToLower().Contains(term) ||
+        return await db.Posts
+                                        .Where(p => p.Title.ToLower().Contains(term) ||
                                          p.Content.ToLower().Contains(term) ||
-                                         p.Category.ToLower().Contains(term)
+                                         p.Category.ToLower().Contains(term) ||
+                                         p.Tags.Any(t => EF.Functions.Like(t.Name, $"%{term}%"))
         ).Select(p => new PostResponseDto(p.Id,
                 p.Title,
                 p.Content,
