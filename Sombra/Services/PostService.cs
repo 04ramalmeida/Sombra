@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Sombra.Endpoints;
+using Sombra.Extensions;
 using Sombra.Models.DTOs;
 using Sombra.Models.Entities;
 
@@ -8,35 +9,7 @@ namespace Sombra.Services;
 public class PostService(SombraDb db)
 {
     private readonly SombraDb _db = db;
-
-    internal async Task<List<PostResponseDto>> GetPostsAsync(string? term)
-    {
-        if (string.IsNullOrEmpty(term))
-        { //TODO: can probably find a way to not repeat this
-            return await db.Posts.Select(p => new PostResponseDto(
-                    p.Id,
-                    p.Title,
-                    p.Content,
-                    p.Category,
-                    new List<string>(p.Tags.Select(t => t.Name))
-                ))
-                .ToListAsync();
-        }
-        
-        return await db.Posts
-                                        .Where(p => p.Title.ToLower().Contains(term) ||
-                                         p.Content.ToLower().Contains(term) ||
-                                         p.Category.ToLower().Contains(term) ||
-                                         p.Tags.Any(t => EF.Functions.Like(t.Name, $"%{term}%"))
-        ).Select(p => new PostResponseDto(p.Id,
-                p.Title,
-                p.Content,
-                p.Category,
-                p.Tags.Select(t => t.Name).ToList()))
-            .ToListAsync();
-        
-    }
-
+    
     internal async Task<PostResponseDto?> GetPostDtoAsync(int id)
     {
         return await db.Posts.Where(p => p.Id == id)
@@ -46,6 +19,22 @@ public class PostService(SombraDb db)
                 p.Content,
                 p.Category,
                 p.Tags.Select(t => t.Name).ToList())).FirstOrDefaultAsync();
+    }
+
+    internal async Task<List<PostResponseDto>> GetPostsAsync(QueryParams parameters)
+    {
+        var query = db.Posts.AsNoTracking().AsQueryable();
+        
+        //Apply search filtering to the query
+        query = query.ApplySearch(parameters.SearchTerm);
+        
+        return await query.Select(p => new PostResponseDto(
+            p.Id,
+            p.Title,
+            p.Content,
+            p.Category,
+            p.Tags.Select(t => t.Name).ToList()))
+            .ToListAsync();
     }
 
     internal async Task<Post?> GetPostByIdAsync(int id)
