@@ -3,6 +3,7 @@ using Sombra.Endpoints;
 using Sombra.Extensions;
 using Sombra.Models.DTOs;
 using Sombra.Models.Entities;
+using Sombra.Utils;
 
 namespace Sombra.Services;
 
@@ -63,7 +64,7 @@ public class PostService(SombraDb db)
         post.Title = input.Title;
         post.Content = input.Content;
         post.Category = input.Category;
-        post.Tags = GetOrCreateTags(input.Tags);
+        post.Tags = PostUtils.GetOrCreateTags(input.Tags, _db);
 
         await db.SaveChangesAsync();
         
@@ -76,21 +77,5 @@ public class PostService(SombraDb db)
         await db.SaveChangesAsync();
     }
     
-    public List<Tag> GetOrCreateTags(List<string> tags)
-    {
-        List<Tag> result = [];
-        
-        result.AddRange(_db.Tags.Where(t => tags.Contains(t.Name)));
-        
-        List<Tag> newTags = 
-            tags.Except(result.Select(t => t.Name))
-                .Select(name => new Tag(name))
-                .ToList();
-        
-        _db.Tags.AddRange(newTags);
-        
-        result.AddRange(newTags);
-        
-        return result;
-    }
+    
 }

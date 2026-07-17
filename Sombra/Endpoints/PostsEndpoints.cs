@@ -38,7 +38,7 @@ public static class PostsEndpoints
         PostService postService)
     {
 
-        var result = await postService.CreatePostAsync(post);
+        var result = await postService.CreatePostAsync(input);
 
         var dto = PostUtils.ToDto(result);
         
