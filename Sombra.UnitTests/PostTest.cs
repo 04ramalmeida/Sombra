@@ -1,3 +1,4 @@
+using Sombra.Extensions;
 using Sombra.Models.DTOs;
 using Sombra.Services;
 using Sombra.Utils;
@@ -7,7 +8,7 @@ namespace Sombra.UnitTests;
 
 public class PostTest
 {
-
+    
     private static (SombraDb, PostService) SetupContext()
     {
         var context = new MockDb().CreateDbContext();
@@ -27,7 +28,7 @@ public class PostTest
     {
         var (context, postService) = SetupContext();
         
-        var post = await SetupExamplePost(context);
+        var post = await SetupPost(context);
         
         Assert.IsType<Post>(post);
         
@@ -35,7 +36,7 @@ public class PostTest
         
         Assert.IsType<PostResponseDto>(result);
         
-        Assert.Equivalent(PostUtils.ExamplePostDto(), result);
+        Assert.Equivalent(PostUtils.ToCreateDto(post), result);
     }
 
     [Fact]
@@ -53,11 +54,13 @@ public class PostTest
     {
         var (context, postService) = SetupContext();
         
-        const string term = "tech";
+        var posts = await SetupPosts(context);
         
-        var post= await SetupExamplePost(context);
+        var tags = posts.SelectMany(p => p.Tags)
+            .Select(t => t.Name)
+            .ToList();
 
-        Assert.IsType<Post>(post);
+        var term = tags.GetRndTag();
         
         var result = await postService.GetPostsAsync(new QueryParams
         {
@@ -73,11 +76,11 @@ public class PostTest
     {
         var (context, postService) = SetupContext();
         
-        const string term = "Painting";
+        const string term = "zzzzzzzzzzzzzzzzzzzzzz((((((((((("; 
         
-        var postResult = await SetupExamplePost(context);
+        var postsResult = await SetupPosts(context);
         
-        Assert.IsType<Post>(postResult);
+        Assert.IsType<List<Post>>(postsResult);
         
         var result = await postService.GetPostsAsync(new QueryParams
         {
@@ -92,7 +95,7 @@ public class PostTest
     {
         var (context, postService) = SetupContext();
         
-        var post = await postService.CreatePostAsync(PostUtils.ExamplePost());
+        var post = await postService.CreatePostAsync(PostUtils.GeneratePost());
         
         Assert.NotNull(post);
         var dbPost = context.Posts.FirstOrDefault(p => p.Id == post.Id);
@@ -105,7 +108,7 @@ public class PostTest
     {
         var (context, postService) = SetupContext();
 
-        var post = await SetupExamplePost(context);
+        var post = await SetupPost(context);
         
         var postId = post.Id;
 
@@ -120,13 +123,20 @@ public class PostTest
 
         Assert.IsType<Post>(result);
         
-        var dbResult = context.Posts.FirstOrDefault(p => p.Id == postId);
+        var dbResult = context.Posts.Where(p => p.Id == postId)
+            .Select(p => new PostResponseDto(
+                p.Id,
+                p.Title,
+                p.Content,
+                p.Category,
+                p.Tags.Select(t => t.Name).ToList()
+                )).FirstOrDefault();
         
         Assert.NotNull(dbResult);
         Assert.Equivalent(update.Title, dbResult.Title);
         Assert.Equivalent(update.Content, dbResult.Content);
         Assert.Equivalent(update.Category, dbResult.Category);
-        Assert.Equivalent(update.Tags, dbResult.Tags.Select(t=>t.Name));
+        Assert.Equivalent(update.Tags, dbResult.Tags);
     }
 
     [Fact]
@@ -135,7 +145,7 @@ public class PostTest
         // Given
         var (context, postService) = SetupContext();
 
-        var post = await SetupExamplePost(context);
+        var post = await SetupPost(context);
 
         var postId = post.Id;
         // When
@@ -145,11 +155,19 @@ public class PostTest
         Assert.Null(dbResult);
     }
 
-    private async Task<Post> SetupExamplePost(SombraDb context)
+    private static async Task<Post> SetupPost(SombraDb context)
     {
-        var post = PostUtils.ExamplePost();
+        var post = PostUtils.CreateToModel(PostUtils.GeneratePost());
         await context.Posts.AddAsync(post);
         await context.SaveChangesAsync();
         return post;
+    }
+
+    private async Task<List<Post>> SetupPosts(SombraDb context)
+    {
+        var posts = PostUtils.CreateDtosToModel(PostUtils.GeneratePosts(10));
+        await context.Posts.AddRangeAsync(posts);
+        await context.SaveChangesAsync();
+        return posts;
     }
 }

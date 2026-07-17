@@ -40,7 +40,7 @@ public static class PostsEndpoints
 
         var result = await postService.CreatePostAsync(input);
 
-        var dto = PostUtils.ToDto(result);
+        var dto = PostUtils.ToResponseDto(result);
         
         return TypedResults.Created($"/posts/{result.Id}", dto);
     }
@@ -52,7 +52,7 @@ public static class PostsEndpoints
 
         var result = await postService.UpdatePostAsync(post, input);
         
-        var dto = PostUtils.ToDto(result);
+        var dto = PostUtils.ToResponseDto(result);
         
         return TypedResults.Ok(dto);
     }

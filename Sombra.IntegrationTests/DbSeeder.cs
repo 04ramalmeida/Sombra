@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Sombra.Models.DTOs;
 using Sombra.Models.Entities;
 using Sombra.Utils;
 
@@ -18,27 +19,28 @@ public class DbSeeder
             context.Set<Tag>().RemoveRange(context.Set<Tag>());
         }
 
-        var examplePost = PostUtils.ExamplePostDto();
-        
-        var tag = new Tag(examplePost.Tags[0]);
-        context.Set<Tag>().Add(tag);
+        var generatedPosts = PostUtils.GeneratePosts(10);
 
-        List<Post> posts = [];
-        
-        for (int i = 0; i < 2; i++)
-        {
-            posts.Add(new Post
-            {
-                Title = examplePost.Title,
-                Content = examplePost.Content,
-                Category =  examplePost.Category,
-                Tags = [tag]
-            });
-        }
+        List<Post> posts = CreateDtosToModel(generatedPosts, (SombraDb)context);
         
         context.Set<Post>().AddRange(posts);
-        
-        
+
         context.SaveChanges();
+    }
+    
+    public static List<Post> CreateDtosToModel(List<CreatePostDto> dtos, SombraDb context)
+    {
+        var result = new List<Post>();
+        foreach (var dto in dtos)
+        {
+            result.Add(new Post
+            {
+                Title = dto.Title,
+                Content = dto.Content,
+                Category = dto.Category,
+                Tags = PostUtils.GetOrCreateTags(dto.Tags, context)
+            });
+        }
+        return result;
     }
 }
