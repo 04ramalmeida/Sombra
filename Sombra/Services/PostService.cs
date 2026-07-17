@@ -42,8 +42,16 @@ public class PostService(SombraDb db)
         return await db.Posts.FindAsync(id);
     } 
 
-    internal async Task<Post> CreatePostAsync(Post post)
+    internal async Task<Post> CreatePostAsync(CreatePostDto input)
     {
+        var post = new Post
+        {
+            Title = input.Title,
+            Content = input.Content,
+            Category = input.Category,
+            Tags = PostUtils.GetOrCreateTags(input.Tags, _db)
+        };
+        
         await db.Posts.AddAsync(post);
         await db.SaveChangesAsync();
         return post;

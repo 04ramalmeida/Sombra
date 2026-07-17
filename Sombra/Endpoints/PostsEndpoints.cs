@@ -37,13 +37,6 @@ public static class PostsEndpoints
     private static async Task<IResult> CreatePost(CreatePostDto input,
         PostService postService)
     {
-        var post = new Post
-        {
-            Title = input.Title,
-            Content = input.Content,
-            Category = input.Category,
-            Tags = postService.GetOrCreateTags(input.Tags)
-        };
 
         var result = await postService.CreatePostAsync(post);
 
