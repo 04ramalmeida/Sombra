@@ -100,10 +100,10 @@ public class PostTest
         
         var expected = postsResult.OrderBy(p => p.Title).ToList();
 
-        //var result = await context.Posts.ApplySort("title").ToListAsync;
+        var result = await context.Posts.ApplySort(true)
+            .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
         
-        Assert.IsType<List<PostResponseDto>>(result);
-        Assert.Equivalent(expected, result);
+        Assert.True(expected.SequenceEqual(result));
     }
     
     [Fact]
@@ -115,10 +115,10 @@ public class PostTest
         
         var expected = postsResult.OrderByDescending(p => p.Title).ToList();
 
-        //var result = await context.Posts.ApplySort("title", false).ToListAsync;
+        var result = await context.Posts.ApplySort( false)
+            .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
         
-        Assert.IsType<List<PostResponseDto>>(result);
-        Assert.Equivalent(expected, result);
+        Assert.True(expected.SequenceEqual(result));
     }
     
     [Fact]
@@ -130,10 +130,10 @@ public class PostTest
         
         var expected = postsResult.OrderBy(p => p.Category).ToList();
 
-        //var result = await context.Posts.ApplySort("category").ToListAsync;
+        var result = await context.Posts.ApplySort(true, "category")
+            .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
         
-        Assert.IsType<List<PostResponseDto>>(result);
-        Assert.Equivalent(expected, result);
+        Assert.True(expected.SequenceEqual(result));
     }
 
     [Fact]
@@ -157,10 +157,10 @@ public class PostTest
         
         var expected = context.Posts.OrderBy(p => p.Title).ToList();
         
-        //var result = await context.Posts.ApplySort("title").ToListAsync;
+        var result = await context.Posts.ApplySort(true)
+            .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
         
-        Assert.IsType<List<PostResponseDto>>(result);
-        Assert.Equivalent(expected, result);
+        Assert.True(expected.SequenceEqual(result));
     }
 
     [Fact]
@@ -168,7 +168,8 @@ public class PostTest
     {
         var (context, postService) = SetupContext();
         
-        //var result = await context.Posts.ApplySort("title").ToListAsync;
+        var result = await context.Posts.ApplySort(true)
+            .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
         
         Assert.Empty(result);
     }
