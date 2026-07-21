@@ -100,11 +100,11 @@ public static class PostUtils
     public static List<Tag> GetOrCreateTags(List<string> tags, SombraDb context)
     {
         List<Tag> result = [];
-        
-        ;
-        
-        result.AddRange(context.Tags.Local.Where(t => tags.Contains(t.Name))
+
+
+        result.AddRange(context.Tags.Where(t => tags.Contains(t.Name)).ToList()
             .Concat(context.Tags.Local.Where(t => tags.Contains(t.Name))));
+            
         
         List<Tag> newTags = 
             tags.Except(result.Select(t => t.Name), StringComparer.CurrentCultureIgnoreCase)
