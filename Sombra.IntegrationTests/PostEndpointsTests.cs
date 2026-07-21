@@ -1,7 +1,9 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Sombra.Extensions;
 using Sombra.Models.DTOs;
 using Sombra.Services;
 using Sombra.Utils;
@@ -37,14 +39,18 @@ public class PostEndpointsTests: IClassFixture<TestWebApplicationFactory<Program
     [Fact]
     public async Task GetPosts_WhenTermIncluded_ReturnsOkAndPosts()
     {
-        var response = await _client.GetAsync("/api/posts?term=tech");
+        var tagNames = await _context.Tags.Select(t => t.Name).ToListAsync();
+
+        var term = tagNames.GetRndTag();
+        
+        var response = await _client.GetAsync($"/api/posts?term={term}");
         
         var posts = await response.Content.ReadFromJsonAsync<List<PostResponseDto>>();
         
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.NotNull(posts);
         Assert.NotEmpty(posts);
-        Assert.True(PostUtils.PostsContainsTerm("tech", posts, _context));
+        Assert.True(PostUtils.PostsContainsTerm(term, posts, _context));
     }
 
     [Fact]
