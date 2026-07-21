@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Sombra.Extensions;
 using Sombra.Models.DTOs;
 using Sombra.Services;
@@ -87,6 +88,88 @@ public class PostTest
             SearchTerm = term
         });
         Assert.IsType<List<PostResponseDto>>(result);
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    public async Task SortExtension_WhenSortingByPropAsc_ReturnsCorrectList()
+    {
+        var (context, postService) = SetupContext();
+        
+        var postsResult = await SetupPosts(context);
+        
+        var expected = postsResult.OrderBy(p => p.Title).ToList();
+
+        //var result = await context.Posts.ApplySort("title").ToListAsync;
+        
+        Assert.IsType<List<PostResponseDto>>(result);
+        Assert.Equivalent(expected, result);
+    }
+    
+    [Fact]
+    public async Task SortExtension_WhenSortingByPropDesc_ReturnsCorrectList()
+    {
+        var (context, postService) = SetupContext();
+        
+        var postsResult = await SetupPosts(context);
+        
+        var expected = postsResult.OrderByDescending(p => p.Title).ToList();
+
+        //var result = await context.Posts.ApplySort("title", false).ToListAsync;
+        
+        Assert.IsType<List<PostResponseDto>>(result);
+        Assert.Equivalent(expected, result);
+    }
+    
+    [Fact]
+    public async Task SortExtension_WhenSortingByCategory_ReturnsCorrectList()
+    {
+        var (context, postService) = SetupContext();
+        
+        var postsResult = await SetupPosts(context);
+        
+        var expected = postsResult.OrderBy(p => p.Category).ToList();
+
+        //var result = await context.Posts.ApplySort("category").ToListAsync;
+        
+        Assert.IsType<List<PostResponseDto>>(result);
+        Assert.Equivalent(expected, result);
+    }
+
+    [Fact]
+    public async Task SortExtension_WhenSortingDuplicateValues_ReturnsCorrectList()
+    {
+        var (context, postService) = SetupContext();
+        
+        await SetupPosts(context);
+
+        List<string> tags = ["Test"];
+
+        var post = new Post
+        {
+            Title = "Duplicated Post",
+            Content = "This is a test duplicate post",
+            Category = "Test",
+            Tags = PostUtils.StringsToTags(tags)
+        };
+        
+        await context.Posts.AddRangeAsync(Enumerable.Repeat(post, 2), TestContext.Current.CancellationToken);
+        
+        var expected = context.Posts.OrderBy(p => p.Title).ToList();
+        
+        //var result = await context.Posts.ApplySort("title").ToListAsync;
+        
+        Assert.IsType<List<PostResponseDto>>(result);
+        Assert.Equivalent(expected, result);
+    }
+
+    [Fact]
+    public async Task SortExtension_WhenSortingEmptyList_ReturnsEmptyList()
+    {
+        var (context, postService) = SetupContext();
+        
+        //var result = await context.Posts.ApplySort("title").ToListAsync;
+        
         Assert.Empty(result);
     }
     
