@@ -20,5 +20,5 @@ public record PostResponseDto(
     string Title,
     string Content,
     string Category,
-    List<string> Tags
+    IReadOnlyList<string> Tags
 );
