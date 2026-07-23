@@ -9,26 +9,12 @@ namespace Sombra.UnitTests;
 public class PostTest
 {
     
-    private static (SombraDb, PostService) SetupContext()
-    {
-        var context = new MockDb().CreateDbContext();
-        
-        return (context, new PostService(context));
-    }
-
-    private static PostService SetupService()
-    {
-        var context = new MockDb().CreateDbContext();
-        
-        return (new PostService(context));
-    }
-    
     [Fact]
     public async Task GetPost_WhenPostExists_ReturnsCorrectPost()
     {
-        var (context, postService) = SetupContext();
+        var (context, postService) = PostTestHelper.SetupContext();
         
-        var post = await SetupPost(context);
+        var post = await PostTestHelper.SetupPost(context);
         
         Assert.IsType<Post>(post);
         
@@ -42,7 +28,7 @@ public class PostTest
     [Fact]
     public async Task GetPost_WhenMissing_ReturnsNull()
     {
-        var postService = SetupService();
+        var postService = PostTestHelper.SetupService();
         
         var result = await postService.GetPostDtoAsync(1);
         
@@ -52,9 +38,9 @@ public class PostTest
     [Fact]
     public async Task GetPosts_WhenTermMatches_ReturnsOk()
     {
-        var (context, postService) = SetupContext();
+        var (context, postService) = PostTestHelper.SetupContext();
         
-        var posts = await SetupPosts(context);
+        var posts = await PostTestHelper.SetupPosts(context);
         
         var tags = posts.SelectMany(p => p.Tags)
             .Select(t => t.Name)
@@ -74,11 +60,11 @@ public class PostTest
     [Fact]
     public async Task GetPosts_WhenTermDoesntMatch_ReturnsEmptyList()
     {
-        var (context, postService) = SetupContext();
+        var (context, postService) = PostTestHelper.SetupContext();
         
         const string term = "zzzzzzzzzzzzzzzzzzzzzz((((((((((("; 
         
-        var postsResult = await SetupPosts(context);
+        var postsResult = await PostTestHelper.SetupPosts(context);
         
         Assert.IsType<List<Post>>(postsResult);
         
@@ -93,7 +79,7 @@ public class PostTest
     [Fact]
     public async Task CreatePost_ReturnsCreatedPost()
     {
-        var (context, postService) = SetupContext();
+        var (context, postService) = PostTestHelper.SetupContext();
         
         var post = await postService.CreatePostAsync(PostHelper.GeneratePost());
         
@@ -106,9 +92,9 @@ public class PostTest
     [Fact]
     public async Task UpdatePost_ReturnsUpdatedPost()
     {
-        var (context, postService) = SetupContext();
+        var (context, postService) = PostTestHelper.SetupContext();
 
-        var post = await SetupPost(context);
+        var post = await PostTestHelper.SetupPost(context);
         
         var postId = post.Id;
 
@@ -143,9 +129,9 @@ public class PostTest
     public async Task DeletePost_DeletesThePost()
     {
         // Given
-        var (context, postService) = SetupContext();
+        var (context, postService) = PostTestHelper.SetupContext();
 
-        var post = await SetupPost(context);
+        var post = await PostTestHelper.SetupPost(context);
 
         var postId = post.Id;
         // When
@@ -153,21 +139,5 @@ public class PostTest
         var dbResult = await context.Posts.FindAsync(postId);
         
         Assert.Null(dbResult);
-    }
-
-    private static async Task<Post> SetupPost(SombraDb context)
-    {
-        var post = PostHelper.CreateToModel(PostHelper.GeneratePost());
-        await context.Posts.AddAsync(post);
-        await context.SaveChangesAsync();
-        return post;
-    }
-
-    private async Task<List<Post>> SetupPosts(SombraDb context)
-    {
-        var posts = PostHelper.CreateDtosToModel(PostHelper.GeneratePosts(10));
-        await context.Posts.AddRangeAsync(posts);
-        await context.SaveChangesAsync();
-        return posts;
     }
 }
