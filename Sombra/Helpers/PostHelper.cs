@@ -5,7 +5,7 @@ using Sombra.Models.Entities;
 
 namespace Sombra.Utils;
 
-public static class PostUtils
+public static class PostHelper
 {
     private static readonly Faker Faker = new();
 

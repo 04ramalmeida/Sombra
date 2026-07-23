@@ -50,7 +50,7 @@ public class PostService(SombraDb db)
             Title = input.Title,
             Content = input.Content,
             Category = input.Category,
-            Tags = PostUtils.GetOrCreateTags(input.Tags, _db)
+            Tags = PostHelper.GetOrCreateTags(input.Tags, _db)
         };
         
         await db.Posts.AddAsync(post);
@@ -64,7 +64,7 @@ public class PostService(SombraDb db)
         post.Title = input.Title;
         post.Content = input.Content;
         post.Category = input.Category;
-        post.Tags = PostUtils.GetOrCreateTags(input.Tags, _db);
+        post.Tags = PostHelper.GetOrCreateTags(input.Tags, _db);
 
         await db.SaveChangesAsync();
         

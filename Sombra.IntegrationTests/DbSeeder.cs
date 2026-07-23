@@ -19,7 +19,7 @@ public class DbSeeder
             context.Set<Tag>().RemoveRange(context.Set<Tag>());
         }
 
-        var generatedPosts = PostUtils.GeneratePosts(10);
+        var generatedPosts = PostHelper.GeneratePosts(10);
 
         List<Post> posts = CreateDtosToModel(generatedPosts, (SombraDb)context);
         
@@ -38,7 +38,7 @@ public class DbSeeder
                 Title = dto.Title,
                 Content = dto.Content,
                 Category = dto.Category,
-                Tags = PostUtils.GetOrCreateTags(dto.Tags, context)
+                Tags = PostHelper.GetOrCreateTags(dto.Tags, context)
             });
         }
         return result;

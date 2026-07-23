@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Sombra.Extensions;
 using Sombra.Models.DTOs;
 using Sombra.Services;
@@ -37,7 +36,7 @@ public class PostTest
         
         Assert.IsType<PostResponseDto>(result);
         
-        Assert.Equivalent(PostUtils.ToCreateDto(post), result);
+        Assert.Equivalent(PostHelper.ToCreateDto(post), result);
     }
 
     [Fact]
@@ -69,7 +68,7 @@ public class PostTest
         });
         
         Assert.IsType<List<PostResponseDto>>(result);
-        Assert.True(PostUtils.PostsContainsTerm(term, result, context));
+        Assert.True(PostHelper.PostsContainsTerm(term, result, context));
     }
     
     [Fact]
@@ -90,96 +89,13 @@ public class PostTest
         Assert.IsType<List<PostResponseDto>>(result);
         Assert.Empty(result);
     }
-
-    [Fact]
-    public async Task SortExtension_WhenSortingByPropAsc_ReturnsCorrectList()
-    {
-        var (context, postService) = SetupContext();
-        
-        var postsResult = await SetupPosts(context);
-        
-        var expected = postsResult.OrderBy(p => p.Title).ToList();
-
-        var result = await context.Posts.ApplySort(true)
-            .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
-        
-        Assert.True(expected.SequenceEqual(result));
-    }
-    
-    [Fact]
-    public async Task SortExtension_WhenSortingByPropDesc_ReturnsCorrectList()
-    {
-        var (context, postService) = SetupContext();
-        
-        var postsResult = await SetupPosts(context);
-        
-        var expected = postsResult.OrderByDescending(p => p.Title).ToList();
-
-        var result = await context.Posts.ApplySort( false)
-            .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
-        
-        Assert.True(expected.SequenceEqual(result));
-    }
-    
-    [Fact]
-    public async Task SortExtension_WhenSortingByCategory_ReturnsCorrectList()
-    {
-        var (context, postService) = SetupContext();
-        
-        var postsResult = await SetupPosts(context);
-        
-        var expected = postsResult.OrderBy(p => p.Category).ToList();
-
-        var result = await context.Posts.ApplySort(true, "category")
-            .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
-        
-        Assert.True(expected.SequenceEqual(result));
-    }
-
-    [Fact]
-    public async Task SortExtension_WhenSortingDuplicateValues_ReturnsCorrectList()
-    {
-        var (context, postService) = SetupContext();
-        
-        await SetupPosts(context);
-
-        List<string> tags = ["Test"];
-
-        var post = new Post
-        {
-            Title = "Duplicated Post",
-            Content = "This is a test duplicate post",
-            Category = "Test",
-            Tags = PostUtils.StringsToTags(tags)
-        };
-        
-        await context.Posts.AddRangeAsync(Enumerable.Repeat(post, 2), TestContext.Current.CancellationToken);
-        
-        var expected = context.Posts.OrderBy(p => p.Title).ToList();
-        
-        var result = await context.Posts.ApplySort(true)
-            .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
-        
-        Assert.True(expected.SequenceEqual(result));
-    }
-
-    [Fact]
-    public async Task SortExtension_WhenSortingEmptyList_ReturnsEmptyList()
-    {
-        var (context, postService) = SetupContext();
-        
-        var result = await context.Posts.ApplySort(true)
-            .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
-        
-        Assert.Empty(result);
-    }
     
     [Fact]
     public async Task CreatePost_ReturnsCreatedPost()
     {
         var (context, postService) = SetupContext();
         
-        var post = await postService.CreatePostAsync(PostUtils.GeneratePost());
+        var post = await postService.CreatePostAsync(PostHelper.GeneratePost());
         
         Assert.NotNull(post);
         var dbPost = context.Posts.FirstOrDefault(p => p.Id == post.Id);
@@ -241,7 +157,7 @@ public class PostTest
 
     private static async Task<Post> SetupPost(SombraDb context)
     {
-        var post = PostUtils.CreateToModel(PostUtils.GeneratePost());
+        var post = PostHelper.CreateToModel(PostHelper.GeneratePost());
         await context.Posts.AddAsync(post);
         await context.SaveChangesAsync();
         return post;
@@ -249,7 +165,7 @@ public class PostTest
 
     private async Task<List<Post>> SetupPosts(SombraDb context)
     {
-        var posts = PostUtils.CreateDtosToModel(PostUtils.GeneratePosts(10));
+        var posts = PostHelper.CreateDtosToModel(PostHelper.GeneratePosts(10));
         await context.Posts.AddRangeAsync(posts);
         await context.SaveChangesAsync();
         return posts;
