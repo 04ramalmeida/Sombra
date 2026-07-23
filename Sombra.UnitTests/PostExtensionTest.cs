@@ -183,4 +183,17 @@ public class PostExtensionTest
 
         Assert.True(expected.SequenceEqual(result));
     }
+
+    [Fact]
+    public async Task Pagination_WhenPageExceedsContent_ReturnEmptyList()
+    {
+        var (context, postService) = PostTestHelper.SetupContext();
+        
+        var postResult = await PostTestHelper.SetupPosts(context);
+
+        var result = await context.Posts.ApplyPagination(5)
+            .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
+        
+        Assert.Empty(result);
+    }
 }
