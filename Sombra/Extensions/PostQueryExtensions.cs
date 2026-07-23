@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Namotion.Reflection;
 
 namespace Sombra.Extensions;
 
@@ -27,5 +26,19 @@ public static class PostQueryExtensions
             "category" => ascending ? query.OrderBy(p => p.Category) : query.OrderByDescending(p => p.Category),
             _ => throw new ArgumentException($"Unknown sort property: {sortProp}")
         };
+    }
+
+    // TODO: Migrate to seek pagination after implementing indexes
+    public static IQueryable<Post> ApplyPagination(this IQueryable<Post> query, int page = 1, int pageSize = 5)
+    {
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 5;
+        
+        int firstId = (page - 1) * pageSize;
+
+        return query 
+            .OrderBy(p => p.Id)
+            .Skip(firstId)
+            .Take(pageSize);
     }
 }
