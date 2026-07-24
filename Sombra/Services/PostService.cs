@@ -29,6 +29,9 @@ public class PostService(SombraDb db)
         //Apply search filtering to the query
         query = query.ApplySearch(parameters.SearchTerm);
         
+        //Apply sorting to the query
+        query = query.ApplySort(parameters.Ascending ?? true , parameters.SortBy ?? "title");
+        
         return await query.Select(p => new PostResponseDto(
             p.Id,
             p.Title,
