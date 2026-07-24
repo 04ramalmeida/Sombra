@@ -32,8 +32,13 @@ public class PostEndpointsTests: IClassFixture<TestWebApplicationFactory<Program
         
         var posts = await response.Content.ReadFromJsonAsync<List<Post>>();
         
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.NotNull(posts);
+        
+        var ordered =  posts.OrderBy(p => p.Title);
+        
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        
+        Assert.True(ordered.SequenceEqual(posts));
     }
 
     [Fact]
