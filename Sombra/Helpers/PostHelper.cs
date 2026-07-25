@@ -11,17 +11,24 @@ public static class PostHelper
 
     public static bool PostsContainsTerm(string term, List<PostResponseDto> posts, SombraDb context)
     {
-        bool hasTerm = false;
+        bool hasTerm = true;
 
         foreach (var post in posts)
         {
-            hasTerm = hasTerm ||post.Title.Contains(term, StringComparison.OrdinalIgnoreCase);
-            hasTerm = hasTerm || post.Content.Contains(term, StringComparison.OrdinalIgnoreCase);
-            hasTerm = hasTerm || post.Category.Contains(term, StringComparison.OrdinalIgnoreCase);
-            hasTerm = hasTerm || context.Tags
-                .Any(t =>EF.Functions.Like(t.Name, $"%{term}%")) ;
+            hasTerm = hasTerm && PostContainsTerm(term, post, context);
+            if (!hasTerm) break;
         }
         
+        return hasTerm;
+    }
+
+    private static bool PostContainsTerm(string term, PostResponseDto post, SombraDb context)
+    {
+        var hasTerm = false;
+        hasTerm = hasTerm || post.Title.Contains(term, StringComparison.OrdinalIgnoreCase);
+        hasTerm = hasTerm || post.Content.Contains(term, StringComparison.OrdinalIgnoreCase);
+        hasTerm = hasTerm || post.Category.Contains(term, StringComparison.OrdinalIgnoreCase);
+        hasTerm = hasTerm || post.Tags.Any(t =>EF.Functions.Like(t, $"%{term}%")) ;
         return hasTerm;
     }
 
