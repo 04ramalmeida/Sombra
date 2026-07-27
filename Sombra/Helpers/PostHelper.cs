@@ -27,7 +27,7 @@ public static class PostHelper
         hasTerm = hasTerm || post.Title.Contains(term, StringComparison.OrdinalIgnoreCase);
         hasTerm = hasTerm || post.Content.Contains(term, StringComparison.OrdinalIgnoreCase);
         hasTerm = hasTerm || post.Category.Contains(term, StringComparison.OrdinalIgnoreCase);
-        hasTerm = hasTerm || post.Tags.Any(t =>EF.Functions.Like(t, $"%{term}%")) ;
+        hasTerm = hasTerm || post.Tags.Contains(term, StringComparer.OrdinalIgnoreCase) ;
         return hasTerm;
     }
 
