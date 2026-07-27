@@ -27,7 +27,7 @@ public class PostService(SombraDb db)
         var query = db.Posts.AsNoTracking().AsQueryable();
         
         //Apply search filtering to the query
-        query = query.ApplySearch(parameters.SearchTerm);
+        query = query.ApplySearch(parameters.Term);
         
         //Apply sorting to the query
         query = query.ApplySort(parameters.Ascending ?? true , parameters.SortBy ?? "title");

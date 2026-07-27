@@ -50,7 +50,7 @@ public class PostTest
         
         var result = await postService.GetPostsAsync(new QueryParams
         {
-            SearchTerm = term
+            Term = term
         });
         
         Assert.IsType<List<PostResponseDto>>(result);
@@ -70,7 +70,7 @@ public class PostTest
         
         var result = await postService.GetPostsAsync(new QueryParams
         {
-            SearchTerm = term
+            Term = term
         });
         Assert.IsType<List<PostResponseDto>>(result);
         Assert.Empty(result);
