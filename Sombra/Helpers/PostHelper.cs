@@ -1,9 +1,8 @@
 using Bogus;
-using Microsoft.EntityFrameworkCore;
 using Sombra.Models.DTOs;
 using Sombra.Models.Entities;
 
-namespace Sombra.Utils;
+namespace Sombra.Helpers;
 
 public static class PostHelper
 {

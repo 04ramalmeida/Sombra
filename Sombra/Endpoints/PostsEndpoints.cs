@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
+using Sombra.Helpers;
 using Sombra.Models.DTOs;
 using Sombra.Services;
-using Sombra.Utils;
 
 [assembly: InternalsVisibleTo("Sombra.UnitTests")]
 namespace Sombra.Endpoints;

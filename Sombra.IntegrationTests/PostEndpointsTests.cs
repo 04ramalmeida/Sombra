@@ -4,9 +4,9 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Sombra.Extensions;
+using Sombra.Helpers;
 using Sombra.Models.DTOs;
 using Sombra.Services;
-using Sombra.Utils;
 
 namespace Sombra.IntegrationTests;
 

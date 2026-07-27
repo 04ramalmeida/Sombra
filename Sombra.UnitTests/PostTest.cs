@@ -1,7 +1,7 @@
 using Sombra.Extensions;
+using Sombra.Helpers;
 using Sombra.Models.DTOs;
 using Sombra.Services;
-using Sombra.Utils;
 
 
 namespace Sombra.UnitTests;
