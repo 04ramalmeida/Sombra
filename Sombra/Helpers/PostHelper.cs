@@ -134,4 +134,42 @@ public static class PostHelper
         }
         return result;
     }
+    
+}
+
+public class PostResponseDtoComparer : EqualityComparer<PostResponseDto>
+{
+    public override bool Equals(PostResponseDto? x, PostResponseDto? y)
+    {
+        if (x is null && y is null)
+        {
+            return true;
+        } 
+        if (x is null || y is null) return false;
+        
+        return x.Id ==  y.Id
+               && x.Title == y.Title
+               &&  x.Category == y.Category
+               && x.Content == y.Content
+               && x.Tags.SequenceEqual(y.Tags);
+    }
+
+    public override int GetHashCode(PostResponseDto? obj)
+    {
+
+        int tagsHash = 0;
+        
+        if (obj == null)
+        {
+            return HashCode.Combine(0);
+        }
+        
+        foreach (var tag in obj.Tags)
+        {
+            tagsHash = HashCode.Combine(tagsHash, tag.GetHashCode());
+        }
+
+        return HashCode.Combine(obj.Id, obj.Title, obj.Category, obj.Content,  tagsHash);
+        
+    }
 }
