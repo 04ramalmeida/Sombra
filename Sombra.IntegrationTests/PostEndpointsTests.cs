@@ -41,21 +41,51 @@ public class PostEndpointsTests: IClassFixture<TestWebApplicationFactory<Program
         Assert.True(ordered.SequenceEqual(posts));
     }
 
-    [Fact]
-    public async Task GetPosts_WhenTermIncluded_ReturnsOkAndPosts()
+    [Theory]
+    [InlineData("category", false, false)]
+    [InlineData("title", true, false)]
+    [InlineData("id", true, false)]
+    [InlineData("title", false, true)]
+    
+    public async Task GetPosts_WhenParamsIncluded_ReturnsOkAndPosts(string sortBy, bool ascending, bool inclSearch)
     {
-        var tagNames = await _context.Tags.Select(t => t.Name).ToListAsync();
-
-        var term = tagNames.GetRndTag();
+        HttpResponseMessage response;
+        List<PostResponseDto> original = [];
         
-        var response = await _client.GetAsync($"/api/posts?term={term}");
-        
+        if (inclSearch)
+        {
+            var tagNames = await _context.Tags.Select(t => t.Name).ToListAsync();
+            var term = tagNames.GetRndTag();
+            original =  PostHelper.ToResponseDtos(_context.Posts.Include(p => p.Tags).ApplySearch(term).ToList());
+            response = await _client.GetAsync($"/api/posts?term={term}&sortby={sortBy}&ascending={ascending}");
+        }
+        else
+        {
+            original = PostHelper.ToResponseDtos(_context.Posts.Include(p => p.Tags).ToList());
+            response = await _client.GetAsync($"/api/posts?sortby={sortBy}&ascending={ascending}");
+        }
         var posts = await response.Content.ReadFromJsonAsync<List<PostResponseDto>>();
+
         
+        Assert.NotNull(posts);
+
+        List<PostResponseDto> orderedPosts = sortBy switch
+        {
+            "title" => ascending
+                ? original.OrderBy(p => p.Title).ToList()
+                : original.OrderByDescending(p => p.Title).ToList(),
+            "category" => ascending
+                ? original.OrderBy(p => p.Category).ToList()
+                : original.OrderByDescending(p => p.Category).ToList(),
+            "id" => ascending ? original.OrderBy(p => p.Id).ToList() 
+                : original.OrderByDescending(p => p.Id).ToList(),
+            _ => original
+        };
+
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.NotNull(posts);
         Assert.NotEmpty(posts);
-        Assert.True(PostHelper.PostsContainsTerm(term, posts, _context));
+        Assert.True(posts.SequenceEqual(orderedPosts, new PostResponseDtoComparer()));
     }
 
     [Fact]
