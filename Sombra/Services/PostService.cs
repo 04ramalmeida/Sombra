@@ -26,6 +26,9 @@ public class PostService(SombraDb db)
     {
         var query = db.Posts.AsNoTracking().AsQueryable();
         
+        //Apply pagination to the query
+        query = query.ApplyPagination(parameters.PageNumber ?? 1, parameters.PageSize ?? 5);
+        
         //Apply search filtering to the query
         query = query.ApplySearch(parameters.Term);
         
