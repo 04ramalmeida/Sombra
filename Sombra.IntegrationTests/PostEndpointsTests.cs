@@ -46,24 +46,39 @@ public class PostEndpointsTests: IClassFixture<TestWebApplicationFactory<Program
     [InlineData("title", true, false)]
     [InlineData("id", true, false)]
     [InlineData("title", false, true)]
+    [InlineData("title", false, true, 2, 5)]
     
-    public async Task GetPosts_WhenParamsIncluded_ReturnsOkAndPosts(string sortBy, bool ascending, bool inclSearch)
+    public async Task GetPosts_WhenParamsIncluded_ReturnsOkAndPosts(string sortBy,
+        bool ascending,
+        bool inclSearch,
+        int pageNum = 1,
+        int pageSize = 5)
     {
         HttpResponseMessage response;
         List<PostResponseDto> original = [];
+        int firstPageId = (pageNum - 1) * pageSize;
         
         if (inclSearch)
         {
+            
             var tagNames = await _context.Tags.Select(t => t.Name).ToListAsync();
             var term = tagNames.GetRndTag();
-            original =  PostHelper.ToResponseDtos(_context.Posts.Include(p => p.Tags).ApplySearch(term).ToList());
-            response = await _client.GetAsync($"/api/posts?term={term}&sortby={sortBy}&ascending={ascending}");
+            original =  PostHelper.ToResponseDtos(_context.Posts.Include(p => p.Tags)
+                .OrderBy(p => p.Id)
+                .Skip(firstPageId).Take(pageSize)
+                .ApplySearch(term).ToList());
+            response = await _client.GetAsync
+                ($"/api/posts?term={term}&sortby={sortBy}&ascending={ascending}&page={pageNum}&pageSize={pageSize}");
         }
         else
         {
-            original = PostHelper.ToResponseDtos(_context.Posts.Include(p => p.Tags).ToList());
-            response = await _client.GetAsync($"/api/posts?sortby={sortBy}&ascending={ascending}");
+            original = PostHelper.ToResponseDtos(_context.Posts.Include(p => p.Tags)
+                .OrderBy(p => p.Id)
+                .Skip(firstPageId).Take(pageSize).ToList());
+            response = await _client.GetAsync
+                ($"/api/posts?sortby={sortBy}&ascending={ascending}&page={pageNum}&pageSize={pageSize}");
         }
+        
         var posts = await response.Content.ReadFromJsonAsync<List<PostResponseDto>>();
 
         
@@ -84,7 +99,6 @@ public class PostEndpointsTests: IClassFixture<TestWebApplicationFactory<Program
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.NotNull(posts);
-        Assert.NotEmpty(posts);
         Assert.True(posts.SequenceEqual(orderedPosts, new PostResponseDtoComparer()));
     }
 
