@@ -38,8 +38,7 @@ public class TestWebApplicationFactory<TProgram>
             
             services.AddDbContext<SombraDb>(options =>
             {
-                options.UseSqlServer(connectionString)
-                    .UseSeeding((context, _) => DbSeeder.InitDb(context));
+                options.UseSqlServer(connectionString);
             });
         });
         
@@ -48,7 +47,10 @@ public class TestWebApplicationFactory<TProgram>
         using var scope = host.Services.CreateScope();
         
         var db = scope.ServiceProvider.GetRequiredService<SombraDb>();
+        db.Database.EnsureDeleted();
         db.Database.Migrate();
+        
+        DbSeeder.InitDb(db);
         
         return host;
     }
