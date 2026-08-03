@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Sombra.Models.Entities;
 
 namespace Sombra.Extensions;
 
@@ -10,7 +11,6 @@ public static class PostQueryExtensions
         
         return query.Where(p => EF.Functions.Like(p.Title, $"%{searchTerm}%")
             || EF.Functions.Like(p.Content, $"%{searchTerm}%")
-            || EF.Functions.Like(p.Category, $"%{searchTerm}%")
             || EF.Functions.Like(p.Category, $"%{searchTerm}%")
             || p.Tags.Any(t=> EF.Functions.Like(t.Name, $"%{searchTerm}%")));
     }
@@ -24,6 +24,8 @@ public static class PostQueryExtensions
             "id" => ascending ? query.OrderBy(p => p.Id) : query.OrderByDescending(p => p.Id),
             "title" => ascending ? query.OrderBy(p => p.Title) : query.OrderByDescending(p => p.Title),
             "category" => ascending ? query.OrderBy(p => p.Category) : query.OrderByDescending(p => p.Category),
+            "createdat" => ascending ? query.OrderBy(p => p.CreatedAt) : query.OrderByDescending(p => p.CreatedAt),
+            "modifiedat" =>  ascending ? query.OrderBy(p => p.UpdatedAt) : query.OrderByDescending(p => p.UpdatedAt),
             _ => throw new ArgumentException($"Unknown sort property: {sortProp}")
         };
     }

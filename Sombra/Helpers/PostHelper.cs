@@ -36,7 +36,9 @@ public static class PostHelper
         post.Title,
         post.Content,
         post.Category,
-        post.Tags.Select(tag => tag.Name).ToList());
+        post.Tags.Select(tag => tag.Name).ToList(),
+        post.CreatedAt,
+        post.UpdatedAt);
     
     public static List<PostResponseDto> ToResponseDtos(List<Post> posts) => posts.Select(ToResponseDto).ToList();
     
@@ -151,7 +153,9 @@ public class PostResponseDtoComparer : EqualityComparer<PostResponseDto>
                && x.Title == y.Title
                &&  x.Category == y.Category
                && x.Content == y.Content
-               && x.Tags.SequenceEqual(y.Tags);
+               && x.Tags.SequenceEqual(y.Tags) 
+               && x.CreatedAt == y.CreatedAt
+               && x.UpdatedAt == y.UpdatedAt;
     }
 
     public override int GetHashCode(PostResponseDto? obj)
@@ -169,7 +173,7 @@ public class PostResponseDtoComparer : EqualityComparer<PostResponseDto>
             tagsHash = HashCode.Combine(tagsHash, tag.GetHashCode());
         }
 
-        return HashCode.Combine(obj.Id, obj.Title, obj.Category, obj.Content,  tagsHash);
+        return HashCode.Combine(obj.Id, obj.Title, obj.Category, obj.Content, obj.CreatedAt, obj.UpdatedAt,  tagsHash);
         
     }
 }

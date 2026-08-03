@@ -1,7 +1,8 @@
 using System.Text.Json.Serialization;
-using Sombra.Models.Entities;
 
-public class Post
+namespace Sombra.Models.Entities;
+
+public class Post : IEntity
 {
     public int Id { get; init; }
 
@@ -13,4 +14,8 @@ public class Post
 
     [JsonIgnore]
     public List<Tag> Tags { get; set; } = [];
+    
+    public DateTimeOffset CreatedAt { get; set; }
+    
+    public DateTimeOffset? UpdatedAt { get; set; }
 }

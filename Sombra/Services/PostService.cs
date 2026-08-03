@@ -14,12 +14,14 @@ public class PostService(SombraDb db)
     internal async Task<PostResponseDto?> GetPostDtoAsync(int id)
     {
         return await db.Posts.Where(p => p.Id == id)
-            .Select(p => new PostResponseDto(
+            .Select(p => new PostResponseDto( //TODO: maybe replace this with the helper method?
                 p.Id,
                 p.Title,
                 p.Content,
                 p.Category,
-                p.Tags.Select(t => t.Name).ToList())).FirstOrDefaultAsync();
+                p.Tags.Select(t => t.Name).ToList(),
+                p.CreatedAt,
+                p.UpdatedAt)).FirstOrDefaultAsync();
     }
 
     internal async Task<List<PostResponseDto>> GetPostsAsync(QueryParams parameters)
@@ -35,12 +37,14 @@ public class PostService(SombraDb db)
         //Apply sorting to the query
         query = query.ApplySort(parameters.Ascending ?? true , parameters.SortBy ?? "title");
         
-        return await query.Select(p => new PostResponseDto(
+        return await query.Select(p => new PostResponseDto( //TODO: maybe replace this with the helper method?
             p.Id,
             p.Title,
             p.Content,
             p.Category,
-            p.Tags.Select(t => t.Name).ToList()))
+            p.Tags.Select(t => t.Name).ToList(),
+            p.CreatedAt,
+            p.UpdatedAt))
             .ToListAsync();
     }
 
@@ -71,7 +75,7 @@ public class PostService(SombraDb db)
         post.Content = input.Content;
         post.Category = input.Category;
         post.Tags = PostHelper.GetOrCreateTags(input.Tags, _db);
-
+        
         await db.SaveChangesAsync();
         
         return post;

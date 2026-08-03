@@ -20,5 +20,7 @@ public record PostResponseDto(
     string Title,
     string Content,
     string Category,
-    IReadOnlyList<string> Tags
+    IReadOnlyList<string> Tags,
+    DateTimeOffset CreatedAt,
+    DateTimeOffset? UpdatedAt
 );

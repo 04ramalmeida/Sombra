@@ -1,4 +1,5 @@
 using Sombra.Helpers;
+using Sombra.Models.Entities;
 using Sombra.Services;
 
 namespace Sombra.UnitTests;
