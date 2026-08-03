@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Sombra.Extensions;
 using Sombra.Helpers;
+using Sombra.Models.Entities;
 
 namespace Sombra.UnitTests;
 

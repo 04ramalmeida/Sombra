@@ -1,6 +1,7 @@
 using Sombra.Extensions;
 using Sombra.Helpers;
 using Sombra.Models.DTOs;
+using Sombra.Models.Entities;
 using Sombra.Services;
 
 
@@ -115,8 +116,9 @@ public class PostTest
                 p.Title,
                 p.Content,
                 p.Category,
-                p.Tags.Select(t => t.Name).ToList()
-                )).FirstOrDefault();
+                p.Tags.Select(t => t.Name).ToList(),
+                p.CreatedAt,
+                p.UpdatedAt)).FirstOrDefault();
         
         Assert.NotNull(dbResult);
         Assert.Equivalent(update.Title, dbResult.Title);

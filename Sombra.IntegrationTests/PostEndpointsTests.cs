@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Sombra.Extensions;
 using Sombra.Helpers;
 using Sombra.Models.DTOs;
+using Sombra.Models.Entities;
 using Sombra.Services;
 
 namespace Sombra.IntegrationTests;
@@ -45,6 +46,7 @@ public class PostEndpointsTests: IClassFixture<TestWebApplicationFactory<Program
     [InlineData("category", false, false)]
     [InlineData("title", true, false)]
     [InlineData("id", true, false)]
+    [InlineData("createdAt", true, false)]
     [InlineData("title", false, true)]
     [InlineData("title", false, true, 2, 5)]
     
@@ -78,9 +80,9 @@ public class PostEndpointsTests: IClassFixture<TestWebApplicationFactory<Program
             response = await _client.GetAsync
                 ($"/api/posts?sortby={sortBy}&ascending={ascending}&page={pageNum}&pageSize={pageSize}");
         }
-        
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var posts = await response.Content.ReadFromJsonAsync<List<PostResponseDto>>();
-
+        
         
         Assert.NotNull(posts);
 
@@ -97,7 +99,7 @@ public class PostEndpointsTests: IClassFixture<TestWebApplicationFactory<Program
             _ => original
         };
 
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        
         Assert.NotNull(posts);
         Assert.True(posts.SequenceEqual(orderedPosts, new PostResponseDtoComparer()));
     }
