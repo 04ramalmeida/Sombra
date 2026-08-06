@@ -105,6 +105,27 @@ public class PostEndpointsTests: IClassFixture<TestWebApplicationFactory<Program
     }
 
     [Fact]
+    public async Task GetPost_WhenPostExists_ReturnsOkAndPost()
+    {
+        var post = _context.Posts.FirstOrDefault(p => p.Id == 5);
+        
+        Assert.NotNull(post);
+        
+        var response = await _client.GetAsync($"/api/posts/5");
+        
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equivalent(post, await response.Content.ReadFromJsonAsync<PostResponseDto>());
+    }
+    
+    [Fact]
+    public async Task GetPost_WhenIdInvalid_ReturnsNotFound()
+    {
+        var response = await _client.GetAsync("/api/post/99999999999");
+        
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+    
+    [Fact]
     public async Task CreatePost_WhenInputValid_ReturnsCreatedPost()
     {
         var input = new CreatePostDto(
