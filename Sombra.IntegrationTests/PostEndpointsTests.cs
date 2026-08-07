@@ -81,11 +81,18 @@ public class PostEndpointsTests: IClassFixture<TestWebApplicationFactory<Program
                 ($"/api/posts?sortby={sortBy}&ascending={ascending}&page={pageNum}&pageSize={pageSize}");
         }
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var posts = await response.Content.ReadFromJsonAsync<List<PostResponseDto>>();
-        
-        
+        var pagedResponse = await response.Content.ReadFromJsonAsync<PagedResponse<PostResponseDto>>();
+        Assert.NotNull(pagedResponse);
+        var posts = pagedResponse.Data;
         Assert.NotNull(posts);
-
+        var totalRecords = posts.Count;
+        var hasNextPage = pagedResponse.PageNumber < pagedResponse.TotalPages;
+        var hasPreviousPage = pagedResponse.PageNumber > 1;
+        
+        PagedResponseHelper.AssertResponsePropsEquality(
+            (pageNum, pageSize, (int)Math.Ceiling(totalRecords / (double)pageSize), totalRecords, hasNextPage, hasPreviousPage),
+            pagedResponse);
+        
         List<PostResponseDto> orderedPosts = sortBy switch
         {
             "title" => ascending
