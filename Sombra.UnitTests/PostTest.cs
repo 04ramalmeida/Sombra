@@ -36,6 +36,7 @@ public class PostTest
         Assert.Null(result);
     }
 
+    // The unit tests will not be testing PagedResponse results
     [Fact]
     public async Task GetPosts_WhenTermMatches_ReturnsOk()
     {
@@ -54,8 +55,8 @@ public class PostTest
             Term = term
         });
         
-        Assert.IsType<List<PostResponseDto>>(result);
-        Assert.True(PostHelper.PostsContainsTerm(term, result, context));
+        Assert.IsType<PagedResponse<IReadOnlyList<PostResponseDto>>>(result);
+        Assert.True(PostHelper.PostsContainsTerm(term, result.Data, context));
     }
     
     [Fact]
@@ -73,7 +74,7 @@ public class PostTest
         {
             Term = term
         });
-        Assert.IsType<List<PostResponseDto>>(result);
+        Assert.IsType<IReadOnlyList<PostResponseDto>>(result);
         Assert.Empty(result);
     }
     
