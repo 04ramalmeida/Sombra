@@ -55,8 +55,8 @@ public class PostTest
             Term = term
         });
         
-        Assert.IsType<PagedResponse<IReadOnlyList<PostResponseDto>>>(result);
-        Assert.True(PostHelper.PostsContainsTerm(term, result.Data, context));
+        Assert.IsType<PagedResponse<PostResponseDto>>(result);
+        Assert.True(PostHelper.PostsContainsTerm(term, result.Data.ToList(), context));
     }
     
     [Fact]
@@ -74,8 +74,8 @@ public class PostTest
         {
             Term = term
         });
-        Assert.IsType<IReadOnlyList<PostResponseDto>>(result);
-        Assert.Empty(result);
+        Assert.IsType<List<PostResponseDto>>(result.Data);
+        Assert.Empty(result.Data);
     }
     
     [Fact]
