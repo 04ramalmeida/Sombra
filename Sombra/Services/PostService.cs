@@ -24,20 +24,25 @@ public class PostService(SombraDb db)
                 p.UpdatedAt)).FirstOrDefaultAsync();
     }
 
-    internal async Task<List<PostResponseDto>> GetPostsAsync(QueryParams parameters)
+    internal async Task<PagedResponse<PostResponseDto>> GetPostsAsync(QueryParams parameters)
     {
-        var query = db.Posts.AsNoTracking().AsQueryable();
+        var pageNumber = Math.Max(1, parameters.PageNumber ?? 1);
+        var pageSize = Math.Clamp(parameters.PageSize ?? 5, 1, 15);
         
-        //Apply pagination to the query
-        query = query.ApplyPagination(parameters.PageNumber ?? 1, parameters.PageSize ?? 5);
+        var query = db.Posts.AsNoTracking().AsQueryable();
         
         //Apply search filtering to the query
         query = query.ApplySearch(parameters.Term);
         
+        var totalRecords = await query.CountAsync();
+        
         //Apply sorting to the query
         query = query.ApplySort(parameters.Ascending ?? true , parameters.SortBy ?? "title");
         
-        return await query.Select(p => new PostResponseDto( //TODO: maybe replace this with the helper method?
+        //Apply pagination to the query
+        query = query.ApplyPagination(parameters.PageNumber ?? 1, parameters.PageSize ?? 5);
+        
+        var data = await query.Select(p => new PostResponseDto( //TODO: maybe replace this with the helper method?
             p.Id,
             p.Title,
             p.Content,
@@ -46,6 +51,15 @@ public class PostService(SombraDb db)
             p.CreatedAt,
             p.UpdatedAt))
             .ToListAsync();
+
+        return new PagedResponse<PostResponseDto>
+        {
+            Data = data,
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize),
+            TotalRecords = totalRecords
+        };
     }
 
     internal async Task<Post?> GetPostByIdAsync(int id)
