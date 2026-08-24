@@ -38,8 +38,7 @@ public static class PostQueryExtensions
         
         int firstId = (page - 1) * pageSize;
 
-        return query 
-            .OrderBy(p => p.Id)
+        return query
             .Skip(firstId)
             .Take(pageSize);
     }
